@@ -24,8 +24,9 @@ type ProductFormValues = z.infer<typeof formSchema> & {
 
 export default function ProductRegister() {
   const [mainImage, setMainImage] = useState<File | null>(null);
+  const [mainImagePreview, setMainImagePreview] = useState<string | null>(null);
   const [detailImages, setDetailImages] = useState<File[]>([]);
-
+  const [detailImagePreviews, setDetailImagePreviews] = useState<string[]>([]);
 
   const form = useForm<ProductFormValues>({
     resolver: zodResolver(formSchema),
@@ -46,10 +47,35 @@ export default function ProductRegister() {
     if (!files) return;
 
     if (field === 'mainImage') {
-      setMainImage(files[0]);
+      const file = files[0];
+      setMainImage(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setMainImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
     } else {
-      setDetailImages(Array.from(files));
+      const newFiles = Array.from(files);
+      setDetailImages((prev) => [...prev, ...newFiles]);
+
+      newFiles.forEach((file) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setDetailImagePreviews((prev) => [...prev, reader.result as string]);
+        };
+        reader.readAsDataURL(file);
+      });
     }
+  };
+
+  const removeDetailImage = (index: number) => {
+    setDetailImages((prev) => prev.filter((_, i) => i !== index));
+    setDetailImagePreviews((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const removeMainImage = () => {
+    setMainImage(null);
+    setMainImagePreview(null);
   };
 
   const navigate = useNavigate();
@@ -67,7 +93,7 @@ export default function ProductRegister() {
         mainImage,
         detailImages,
       },
-      { onSuccess }
+      { onSuccess },
     );
   };
 
@@ -178,27 +204,65 @@ export default function ProductRegister() {
           <label htmlFor="mainImage" className="block text-sm font-medium text-gray-700">
             메인 이미지
           </label>
-          <input
-            id="mainImage"
-            type="file"
-            onChange={(e) => handleFileChange(e, 'mainImage')}
-            accept="image/*"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          />
+          <div className="flex flex-col gap-2">
+            <input
+              id="mainImage"
+              type="file"
+              onChange={(e) => handleFileChange(e, 'mainImage')}
+              accept="image/*"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+            {mainImagePreview && (
+              <div className="relative w-32 h-32">
+                <img
+                  src={mainImagePreview}
+                  alt="메인 이미지 미리보기"
+                  className="w-full h-full object-cover rounded-md"
+                />
+                <button
+                  type="button"
+                  onClick={removeMainImage}
+                  className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600"
+                >
+                  ×
+                </button>
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="space-y-2">
           <label htmlFor="detailImages" className="block text-sm font-medium text-gray-700">
             상세 이미지
           </label>
-          <input
-            id="detailImages"
-            type="file"
-            onChange={(e) => handleFileChange(e, 'detailImages')}
-            accept="image/*"
-            multiple
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          />
+          <div className="flex flex-col gap-2">
+            <input
+              id="detailImages"
+              type="file"
+              onChange={(e) => handleFileChange(e, 'detailImages')}
+              accept="image/*"
+              multiple
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+            <div className="grid grid-cols-4 gap-4">
+              {detailImagePreviews.map((preview, index) => (
+                <div key={index} className="relative w-32 h-32">
+                  <img
+                    src={preview}
+                    alt={`상세 이미지 ${index + 1}`}
+                    className="w-full h-full object-cover rounded-md"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeDetailImage(index)}
+                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600"
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
           <p className="text-sm text-gray-500">여러 장의 이미지를 선택할 수 있습니다</p>
         </div>
 
