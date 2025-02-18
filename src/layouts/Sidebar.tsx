@@ -6,6 +6,9 @@ export default function Sidebar() {
   const location = useLocation();
 
   const checkLocationName = (path: string) => {
+    if (path === PAGE_ROUTE.PRODUCT) {
+      return location.pathname === path || location.pathname === PAGE_ROUTE.PRODUCT_REGISTER;
+    }
     return location.pathname === path;
   };
 
