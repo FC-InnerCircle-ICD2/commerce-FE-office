@@ -1,86 +1,51 @@
-import { useState, ChangeEvent } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import * as z from 'zod';
 import { useNavigate } from 'react-router-dom';
-import { PAGE_ROUTE } from '../../utils/route';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+
+import { PAGE_ROUTE } from '../../utils/route';
 import { useCreateProduct } from '../../hooks/useProducts';
-
-const formSchema = z.object({
-  name: z.string().min(1, '상품명은 필수입니다'),
-  description: z.string().min(1, '상품 설명은 필수입니다'),
-  price: z.string().min(1, '가격은 필수입니다'),
-  providerId: z.string().min(1, '공급자 ID는 필수입니다'),
-  categoryId: z.string().min(1, '카테고리 ID는 필수입니다'),
-  options: z.string().optional(),
-});
-
-type ProductFormValues = z.infer<typeof formSchema> & {
-  mainImage: File | null;
-  detailImages: File[];
-};
+import { useProductImages } from '../../hooks/product/useProductImages';
+import { useProductOptions } from '../../hooks/product/useProductOptions';
+import { productFormSchema } from '../../utils/zod/productSchema';
+import { ProductFormValues } from '../../types/product';
 
 export default function ProductRegister() {
-  const [mainImage, setMainImage] = useState<File | null>(null);
-  const [mainImagePreview, setMainImagePreview] = useState<string | null>(null);
-  const [detailImages, setDetailImages] = useState<File[]>([]);
-  const [detailImagePreviews, setDetailImagePreviews] = useState<string[]>([]);
+  const navigate = useNavigate();
+  const { mutate: createProductMutation, isPending } = useCreateProduct();
+  const {
+    mainImage,
+    mainImagePreview,
+    detailImages,
+    detailImagePreviews,
+    handleFileChange,
+    removeDetailImage,
+    removeMainImage,
+  } = useProductImages();
+  const {
+    options,
+    addOption,
+    removeOption,
+    addOptionDetail,
+    removeOptionDetail,
+    updateOptionName,
+    updateOptionDetail,
+  } = useProductOptions();
 
   const form = useForm<ProductFormValues>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(productFormSchema),
     defaultValues: {
       name: '',
       description: '',
       price: '',
       providerId: '',
       categoryId: '',
-      options: '',
+      options: [],
       mainImage: null,
       detailImages: [],
     },
   });
-
-  const handleFileChange = (e: ChangeEvent<HTMLInputElement>, field: 'mainImage' | 'detailImages') => {
-    const files = e.target.files;
-    if (!files) return;
-
-    if (field === 'mainImage') {
-      const file = files[0];
-      setMainImage(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setMainImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    } else {
-      const newFiles = Array.from(files);
-      setDetailImages((prev) => [...prev, ...newFiles]);
-
-      newFiles.forEach((file) => {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          setDetailImagePreviews((prev) => [...prev, reader.result as string]);
-        };
-        reader.readAsDataURL(file);
-      });
-    }
-  };
-
-  const removeDetailImage = (index: number) => {
-    setDetailImages((prev) => prev.filter((_, i) => i !== index));
-    setDetailImagePreviews((prev) => prev.filter((_, i) => i !== index));
-  };
-
-  const removeMainImage = () => {
-    setMainImage(null);
-    setMainImagePreview(null);
-  };
-
-  const navigate = useNavigate();
-
-  const { mutate: createProductMutation, isPending } = useCreateProduct();
 
   const onSuccess = () => {
     navigate(PAGE_ROUTE.PRODUCT);
@@ -92,6 +57,7 @@ export default function ProductRegister() {
         ...values,
         mainImage,
         detailImages,
+        options,
       },
       { onSuccess },
     );
@@ -183,21 +149,77 @@ export default function ProductRegister() {
             <p className="text-sm text-red-600">{form.formState.errors.categoryId.message}</p>
           )}
         </div>
+        <div className="mt-6 space-y-4">
+          <div className="flex justify-between items-center">
+            <h3 className="text-lg font-semibold">상품 옵션</h3>
+            <button
+              type="button"
+              onClick={addOption}
+              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+            >
+              옵션 추가
+            </button>
+          </div>
 
-        <div className="space-y-2">
-          <label htmlFor="options" className="block text-sm font-medium text-gray-700">
-            옵션
-          </label>
-          <input
-            id="options"
-            {...form.register('options')}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            placeholder="옵션을 입력해주세요"
-          />
-          <p className="text-sm text-gray-500">옵션은 선택사항입니다</p>
-          {form.formState.errors.options && (
-            <p className="text-sm text-red-600">{form.formState.errors.options.message}</p>
-          )}
+          {options.map((option, optionIndex) => (
+            <div key={optionIndex} className="border p-4 rounded-lg space-y-4">
+              <div className="flex items-center space-x-4">
+                <input
+                  type="text"
+                  value={option.name}
+                  onChange={(e) => updateOptionName(optionIndex, e.target.value)}
+                  placeholder="옵션명 (예: 색상, 용량)"
+                  className="flex-1 p-2 border rounded"
+                />
+                <button
+                  type="button"
+                  onClick={() => removeOption(optionIndex)}
+                  className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+                >
+                  삭제
+                </button>
+              </div>
+
+              <div className="space-y-2">
+                {option.optionDetails.map((detail, detailIndex) => (
+                  <div key={detailIndex} className="flex space-x-2 items-start">
+                    <input
+                      type="text"
+                      value={detail.value}
+                      onChange={(e) => updateOptionDetail(optionIndex, detailIndex, 'value', e.target.value)}
+                      placeholder="옵션값 (예: 빨강, 128GB)"
+                      className="flex-1 p-2 border rounded"
+                    />
+                    <div className="flex flex-col w-32">
+                      <input
+                        type="number"
+                        value={detail.additionalPrice}
+                        onChange={(e) =>
+                          updateOptionDetail(optionIndex, detailIndex, 'additionalPrice', parseInt(e.target.value) || 0)
+                        }
+                        className="p-2 border rounded"
+                      />
+                      <label className="text-sm text-gray-600 mb-1">추가 가격</label>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => removeOptionDetail(optionIndex, detailIndex)}
+                      className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+                    >
+                      삭제
+                    </button>
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  onClick={() => addOptionDetail(optionIndex)}
+                  className="mt-2 px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
+                >
+                  옵션값 추가
+                </button>
+              </div>
+            </div>
+          ))}
         </div>
 
         <div className="space-y-2">

@@ -1,3 +1,5 @@
+import { ProductOption } from '../types/product';
+
 const BASE_URL = '/admin/v1/products';
 
 export interface CreateProductData {
@@ -6,7 +8,7 @@ export interface CreateProductData {
   price: string;
   providerId: string;
   categoryId: string;
-  options?: string;
+  options?: ProductOption[];
   mainImage: File | null;
   detailImages: File[];
 }
@@ -17,8 +19,10 @@ const createFormData = (data: CreateProductData) => {
   Object.entries(data).forEach(([key, value]) => {
     if (value === undefined) return;
 
-    if (key !== 'mainImage' && key !== 'detailImages') {
+    if (key !== 'mainImage' && key !== 'detailImages' && key !== 'options') {
       formData.append(key, value);
+    } else if (key === 'options' && value) {
+      formData.append('options', JSON.stringify(value));
     }
   });
 
