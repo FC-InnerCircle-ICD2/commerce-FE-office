@@ -1,7 +1,9 @@
 import { z } from 'zod';
-import { loginSchema } from '../../utils/zod/productSchema';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { loginSchema } from '../../utils/zod/loginSchema';
+import { PAGE_ROUTE } from '../../utils/route';
+import { useNavigate } from 'react-router';
 
 type LoginFormInputs = z.infer<typeof loginSchema>;
 
@@ -13,6 +15,7 @@ export default function Login() {
   } = useForm<LoginFormInputs>({
     resolver: zodResolver(loginSchema),
   });
+  const nav = useNavigate();
 
   const onSubmit = (data: LoginFormInputs) => {
     console.log('로그인 정보:', data);
@@ -42,7 +45,11 @@ export default function Login() {
             <button type="submit" className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600">
               로그인
             </button>
-            <button type="button" className="w-full bg-gray-500 text-white p-2 rounded hover:bg-gray-600">
+            <button
+              type="button"
+              onClick={() => nav(PAGE_ROUTE.JOIN)}
+              className="w-full bg-gray-500 text-white p-2 rounded hover:bg-gray-600"
+            >
               회원가입
             </button>
           </div>

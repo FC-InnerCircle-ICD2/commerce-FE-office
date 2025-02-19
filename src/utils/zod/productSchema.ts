@@ -19,8 +19,3 @@ export const productFormSchema = z.object({
   categoryId: z.string().min(1, '카테고리 ID는 필수입니다'),
   options: z.array(productOptionSchema).optional(),
 });
-
-export const loginSchema = z.object({
-  id: z.string().min(4, '아이디는 최소 4자 이상이어야 합니다.'),
-  password: z.string().min(6, '비밀번호는 최소 6자 이상이어야 합니다.'),
-});
