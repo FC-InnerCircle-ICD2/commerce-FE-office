@@ -4,6 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
+import FormInput from '../../components/common/FormInput';
+
 import { PAGE_ROUTE } from '../../utils/route';
 import { useCreateProduct } from '../../hooks/useProducts';
 import { useProductImages } from '../../hooks/product/useProductImages';
@@ -78,18 +80,13 @@ export default function ProductRegister() {
         theme="light"
       />
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <div className="space-y-2">
-          <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-            상품명
-          </label>
-          <input
-            id="name"
-            {...form.register('name')}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            placeholder="상품명을 입력해주세요"
-          />
-          {form.formState.errors.name && <p className="text-sm text-red-600">{form.formState.errors.name.message}</p>}
-        </div>
+        <FormInput
+          id="name"
+          label="상품명"
+          register={form.register('name')}
+          error={form.formState.errors.name?.message}
+          placeholder="상품명을 입력해주세요"
+        />
 
         <div className="space-y-2">
           <label htmlFor="description" className="block text-sm font-medium text-gray-700">
@@ -106,49 +103,30 @@ export default function ProductRegister() {
           )}
         </div>
 
-        <div className="space-y-2">
-          <label htmlFor="price" className="block text-sm font-medium text-gray-700">
-            가격
-          </label>
-          <input
-            id="price"
-            type="number"
-            {...form.register('price')}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            placeholder="가격을 입력해주세요"
-          />
-          {form.formState.errors.price && <p className="text-sm text-red-600">{form.formState.errors.price.message}</p>}
-        </div>
+        <FormInput
+          id="price"
+          type="number"
+          label="가격"
+          register={form.register('price')}
+          error={form.formState.errors.price?.message}
+          placeholder="가격을 입력해주세요"
+        />
 
-        <div className="space-y-2">
-          <label htmlFor="providerId" className="block text-sm font-medium text-gray-700">
-            공급자 ID
-          </label>
-          <input
-            id="providerId"
-            {...form.register('providerId')}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            placeholder="공급자 ID를 입력해주세요"
-          />
-          {form.formState.errors.providerId && (
-            <p className="text-sm text-red-600">{form.formState.errors.providerId.message}</p>
-          )}
-        </div>
+        <FormInput
+          id="providerId"
+          label="공급자 ID"
+          register={form.register('providerId')}
+          error={form.formState.errors.providerId?.message}
+          placeholder="공급자 ID를 입력해주세요"
+        />
 
-        <div className="space-y-2">
-          <label htmlFor="categoryId" className="block text-sm font-medium text-gray-700">
-            카테고리 ID
-          </label>
-          <input
-            id="categoryId"
-            {...form.register('categoryId')}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            placeholder="카테고리 ID를 입력해주세요"
-          />
-          {form.formState.errors.categoryId && (
-            <p className="text-sm text-red-600">{form.formState.errors.categoryId.message}</p>
-          )}
-        </div>
+        <FormInput
+          id="categoryId"
+          label="카테고리 ID"
+          register={form.register('categoryId')}
+          error={form.formState.errors.categoryId?.message}
+          placeholder="카테고리 ID를 입력해주세요"
+        />
         <div className="mt-6 space-y-4">
           <div className="flex justify-between items-center">
             <h3 className="text-lg font-semibold">상품 옵션</h3>
