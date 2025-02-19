@@ -13,10 +13,8 @@ function App() {
 
   return (
     <Routes>
-      <Route>
-        <Route path={PAGE_ROUTE.LOGIN} element={<Login />} />
-      </Route>
       <Route element={<ProtectedRoute isAuthenticated={isLogin} />}>
+        <Route path={PAGE_ROUTE.LOGIN} element={<Login />} />
         <Route path={PAGE_ROUTE.PRODUCT} element={<Product />} />
         <Route path={PAGE_ROUTE.PRODUCT_REGISTER} element={<ProductRegister />} />
         <Route path={PAGE_ROUTE.BANNER} element={<Banner />} />
