@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { loginSchema } from '../../utils/zod/loginSchema';
 import { PAGE_ROUTE } from '../../utils/route';
 import { useNavigate } from 'react-router';
+import { useAuth } from '../../authContext';
 
 type LoginFormInputs = z.infer<typeof loginSchema>;
 
@@ -16,9 +17,10 @@ export default function Login() {
     resolver: zodResolver(loginSchema),
   });
   const nav = useNavigate();
+  const { login } = useAuth();
 
   const onSubmit = (data: LoginFormInputs) => {
-    console.log('로그인 정보:', data);
+    login(data.id, data.password);
   };
 
   return (
