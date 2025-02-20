@@ -10,6 +10,6 @@ export const bannerFormSchema = z.object({
   bannerOrder: z.coerce.number().min(1, '배너 순서는 필수입니다'),
   startDate: z.string().min(1, '시작 일시는 필수입니다'),
   endDate: z.string().min(1, '종료 일시는 필수입니다'),
-  productId: z.number().optional(),
+  productId: z.coerce.number().optional(),
   linkUrl: z.string().optional(),
 });
