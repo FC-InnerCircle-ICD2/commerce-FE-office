@@ -28,10 +28,9 @@ export default function BannerRegister() {
       bannerOrder: 0,
       startDate: '',
       endDate: '',
-      isDeleted: false,
       productId: 0,
       linkUrl: '',
-      linkType: '',
+      linkType: 'internal',
     },
   });
 
@@ -55,6 +54,7 @@ export default function BannerRegister() {
         ...values,
         bannerImage,
         iconImage,
+        linkType: 'internal',
       },
       { onSuccess },
     );
@@ -155,16 +155,11 @@ export default function BannerRegister() {
         </div>
       </div>
 
-      <div className="flex items-center gap-2">
-        <label className="font-medium">삭제 여부</label>
-        <input type="checkbox" {...register('isDeleted')} className="w-4 h-4" />
-      </div>
-
       <FormInput label="상품 ID" type="number" register={register('productId', { required: true })} />
 
       <FormInput label="링크 URL" type="url" register={register('linkUrl')} placeholder="배너 url을 입력해주세요" />
 
-      <div className="flex flex-col gap-2">
+      {/* <div className="flex flex-col gap-2">
         <label className="font-medium">링크 타입</label>
         <select
           {...register('linkType')}
@@ -175,7 +170,7 @@ export default function BannerRegister() {
           <option value="INTERNAL">내부</option>
           <option value="EXTERNAL">외부</option>
         </select>
-      </div>
+      </div> */}
 
       <div className="flex flex-col gap-2">
         <label className="font-medium">배너 이미지</label>
