@@ -9,6 +9,9 @@ export default function Sidebar() {
     if (path === PAGE_ROUTE.PRODUCT) {
       return location.pathname === path || location.pathname === PAGE_ROUTE.PRODUCT_REGISTER;
     }
+    if (path === PAGE_ROUTE.BANNER) {
+      return location.pathname === path || location.pathname === PAGE_ROUTE.BANNER_REGISTER;
+    }
     return location.pathname === path;
   };
 
