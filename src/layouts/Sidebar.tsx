@@ -9,11 +9,17 @@ export default function Sidebar() {
     if (path === PAGE_ROUTE.PRODUCT) {
       return location.pathname === path || location.pathname === PAGE_ROUTE.PRODUCT_REGISTER;
     }
+    if (path === PAGE_ROUTE.BANNER) {
+      return location.pathname === path || location.pathname === PAGE_ROUTE.BANNER_REGISTER;
+    }
     return location.pathname === path;
   };
 
   const handleNavigation = (path: string) => {
-    if (location.pathname === PAGE_ROUTE.PRODUCT_REGISTER && path !== PAGE_ROUTE.PRODUCT) {
+    if (
+      (location.pathname === PAGE_ROUTE.PRODUCT_REGISTER && path !== PAGE_ROUTE.PRODUCT) ||
+      (location.pathname === PAGE_ROUTE.BANNER_REGISTER && path !== PAGE_ROUTE.BANNER)
+    ) {
       const confirmed = window.confirm('저장하지 않고 페이지를 이동하겠습니까?');
       if (!confirmed) return;
     }
