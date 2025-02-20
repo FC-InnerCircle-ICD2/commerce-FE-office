@@ -10,13 +10,10 @@ import Join from './pages/join/Join';
 import { AuthProvider } from './authContext';
 
 function App() {
-  // TODO: 추후 로그인 여부 세팅해야할 변수
-  const isLogin = false;
-
   return (
     <AuthProvider>
       <Routes>
-        <Route element={<ProtectedRoute isAuthenticated={isLogin} />}>
+        <Route element={<ProtectedRoute />}>
           <Route path={PAGE_ROUTE.LOGIN} element={<Login />} />
           <Route path={PAGE_ROUTE.JOIN} element={<Join />} />
           <Route path={PAGE_ROUTE.PRODUCT} element={<Product />} />

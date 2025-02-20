@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { PAGE_ROUTE } from '../../utils/route';
 import { useNavigate } from 'react-router';
+import { join } from '../../api/auth';
 
 type SignUpFormInputs = z.infer<typeof signUpSchema>;
 
@@ -18,8 +19,9 @@ export default function Join() {
   const nav = useNavigate();
 
   const onSubmit = (data: SignUpFormInputs) => {
-    console.log('회원가입 정보:', data);
+    join(data.email, data.password, data.password, data.userName);
   };
+
   return (
     <main className="w-screen h-screen flex items-center justify-center">
       <div className="w-[500px] p-6 bg-white rounded-lg shadow-lg">
