@@ -63,7 +63,7 @@ export const bannerApi = {
       'Content-Type': 'application/json',
     };
     const formData = createFormData(data);
-    const response = await fetch(BASE_URL, {
+    const response = await fetch('/api/banners', {
       method: 'POST',
       body: formData,
       headers,

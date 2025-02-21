@@ -23,7 +23,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   // ✅ 로그인 함수
   const login = async (email: string, password: string) => {
     try {
-      const response = await fetch('http://3.37.67.153:8081/api/v1/admin/members/auth/login', {
+      const response = await fetch('/api/auth/members/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
