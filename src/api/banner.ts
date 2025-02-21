@@ -1,3 +1,5 @@
+import { getToken } from '../services/auth';
+
 const BASE_URL = 'http://3.38.23.68:8080/api/admin/v1/banners';
 
 export const BANNER_TYPE = {
@@ -54,10 +56,17 @@ const createFormData = (data: CreateBannerData) => {
 export const bannerApi = {
   // 배너 등록
   createBanner: async (data: CreateBannerData) => {
+    const token = getToken();
+
+    const headers = {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    };
     const formData = createFormData(data);
     const response = await fetch(BASE_URL, {
       method: 'POST',
       body: formData,
+      headers,
     });
 
     if (!response.ok) {
