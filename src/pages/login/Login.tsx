@@ -19,8 +19,8 @@ export default function Login() {
   const nav = useNavigate();
   const { login } = useAuth();
 
-  const onSubmit = (data: LoginFormInputs) => {
-    login(data.id, data.password);
+  const onSubmit = async (data: LoginFormInputs) => {
+    await login(data.id, data.password);
   };
 
   return (

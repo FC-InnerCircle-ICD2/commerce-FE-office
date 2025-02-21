@@ -1,3 +1,4 @@
+import { getToken } from '../services/auth';
 import { BASE_URL } from '../utils/apiUrl';
 
 export async function join(email: string, password: string, phone: string, userName: string) {
@@ -11,4 +12,25 @@ export async function join(email: string, password: string, phone: string, userN
 
   const data = await result.json();
   return data;
+}
+
+export async function getMe() {
+  const token = getToken();
+
+  const headers = {
+    Authorization: `Bearer ${token}`,
+    'Content-Type': 'application/json',
+  };
+
+  fetch(`${BASE_URL}/api/v1/admin/members/auth/me`, {
+    method: 'GET',
+    credentials: 'include',
+    headers,
+  })
+    .then((response) => {
+      // 헤더에서 토큰 값 가져오기
+      return response.json();
+    })
+    .then((data) => console.log('데이터:', data))
+    .catch((error) => console.error('에러 발생:', error));
 }

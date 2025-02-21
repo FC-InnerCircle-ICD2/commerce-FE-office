@@ -1,6 +1,6 @@
 // src/context/AuthContext.tsx
 import { createContext, useContext, useState } from 'react';
-import { removeToken, isAuthenticated } from './services/auth';
+import { removeToken, isAuthenticated, setToken } from './services/auth';
 
 export interface IUser {
   email: string;
@@ -8,7 +8,7 @@ export interface IUser {
   userName: string;
   phone: string;
 }
-
+// http://3.37.67.153:8081/api/v1/admin/members/auth/login
 interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
@@ -28,6 +28,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify({ email, password }),
       });
 
@@ -35,6 +36,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         throw new Error('로그인 실패');
       }
 
+      const token = response.headers.get('Access-Token'); // Authorization이 아닌 Access-Token 사용
+      const refresh = response.headers.get('Refresh-Token');
+      if (token && refresh) {
+        setToken(token, refresh);
+      }
       await response.json();
       setAuth(true);
     } catch (error) {

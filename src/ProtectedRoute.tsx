@@ -5,16 +5,19 @@ import { useAuth } from './authContext';
 
 export default function ProtectedRoute() {
   const location = useLocation();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, logout } = useAuth();
 
   if (location.pathname === '/login' || location.pathname === '/join') {
     return isAuthenticated ? <Navigate to={PAGE_ROUTE.PRODUCT} /> : <Outlet />;
   }
 
   return isAuthenticated ? (
-    <Layout>
-      <Outlet />
-    </Layout>
+    <>
+      <button onClick={() => logout()}>로그아웃</button>
+      <Layout>
+        <Outlet />
+      </Layout>
+    </>
   ) : (
     <Navigate to={PAGE_ROUTE.LOGIN} />
   );

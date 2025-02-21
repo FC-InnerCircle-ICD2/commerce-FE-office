@@ -1,4 +1,4 @@
-const BASE_URL = '/admin/v1/banners';
+const BASE_URL = 'http://3.38.23.68:8080/api/admin/v1/banners';
 
 export const BANNER_TYPE = {
   PRODUCT: 'PRODUCT',
