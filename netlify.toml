@@ -1,11 +1,18 @@
-# ✅ 8081 Auth API 프록시
+# ✅ 8081 포트의 Auth API 프록시
 [[redirects]]
   from = "/api/auth/*"
   to = "http://3.37.67.153:8081/api/v1/admin/:splat"
   status = 200
   force = true
 
-# ✅ 8080 Banners API 프록시
+# ✅ 8081 포트의 Auth Members API 프록시 추가
+[[redirects]]
+  from = "/api/auth/members/auth/*"
+  to = "http://3.37.67.153:8081/api/v1/admin/members/auth/:splat"
+  status = 200
+  force = true
+
+# ✅ 8080 포트의 Banners API 프록시
 [[redirects]]
   from = "/api/banners/*"
   to = "http://3.38.23.68:8080/api/admin/v1/banners/:splat"

@@ -2,7 +2,7 @@ import { getToken } from '../services/auth';
 import { BASE_URL } from '../utils/apiUrl';
 
 export async function join(email: string, password: string, phone: string, userName: string) {
-  const result = await fetch(`${BASE_URL}/api/v1/admin/members/auth`, {
+  const result = await fetch(`/api/auth/members/auth`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

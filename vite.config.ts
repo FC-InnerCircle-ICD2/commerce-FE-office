@@ -16,6 +16,11 @@ export default defineConfig({
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api\/banners/, ''),
       },
+      '/api/auth/members/auth': {
+        target: 'http://3.37.67.153:8081/api/v1/admin/members/auth',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/auth\/members\/auth/, ''),
+      },
     },
   },
 });
