@@ -1,16 +1,23 @@
-import { Navigate, Outlet } from 'react-router';
+import { Navigate, Outlet, useLocation } from 'react-router';
 import Layout from './layouts/Layout';
 import { PAGE_ROUTE } from './utils/route';
+import { useAuth } from './authContext';
 
-type Props = {
-  isAuthenticated: boolean;
-};
+export default function ProtectedRoute() {
+  const location = useLocation();
+  const { isAuthenticated, logout } = useAuth();
 
-export default function ProtectedRoute({ isAuthenticated }: Props) {
+  if (location.pathname === '/login' || location.pathname === '/join') {
+    return isAuthenticated ? <Navigate to={PAGE_ROUTE.PRODUCT} /> : <Outlet />;
+  }
+
   return isAuthenticated ? (
-    <Layout>
-      <Outlet />
-    </Layout>
+    <>
+      <button onClick={() => logout()}>로그아웃</button>
+      <Layout>
+        <Outlet />
+      </Layout>
+    </>
   ) : (
     <Navigate to={PAGE_ROUTE.LOGIN} />
   );
