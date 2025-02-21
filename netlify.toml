@@ -1,5 +1,11 @@
 [[redirects]]
   from = "/api/*"
-  to = "http://3.38.23.68:8080/:splat"
+  to = "http://3.37.67.153:8081/api/v1/admin/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/v1/products/*"
+  to = "http://3.38.23.68:8080/api/admin/v1/banners/:splat"
   status = 200
   force = true
