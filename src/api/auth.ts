@@ -1,6 +1,8 @@
 import { getToken } from '../services/auth';
 import { BASE_URL } from '../utils/apiUrl';
 
+const MEMBER_URL = 'https://member-api.emmotional-cart.click/';
+
 export async function join(email: string, password: string, phone: string, userName: string) {
   const result = await fetch(`${BASE_URL}/api/v1/admin/members/auth`, {
     method: 'POST',
@@ -22,7 +24,7 @@ export async function getMe() {
     'Content-Type': 'application/json',
   };
 
-  fetch(`${BASE_URL}/api/v1/admin/members/auth/me`, {
+  fetch(`${MEMBER_URL}api/v1/members/me`, {
     method: 'GET',
     credentials: 'include',
     headers,
