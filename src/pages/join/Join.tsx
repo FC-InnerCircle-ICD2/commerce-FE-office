@@ -18,8 +18,17 @@ export default function Join() {
   });
   const nav = useNavigate();
 
-  const onSubmit = (data: SignUpFormInputs) => {
-    join(data.email, data.password, data.password, data.userName);
+  const onSubmit = async (data: SignUpFormInputs) => {
+    try {
+      const result = await join(data.email, data.password, data.password, data.userName);
+      if (result === true) {
+        nav(PAGE_ROUTE.LOGIN);
+      } else {
+        alert('회원가입에 실패했습니다');
+      }
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   return (
