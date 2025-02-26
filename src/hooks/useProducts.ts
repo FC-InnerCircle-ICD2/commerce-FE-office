@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { productApi } from '../api/product';
 import { toast } from 'react-toastify';
 
@@ -16,5 +16,12 @@ export const useCreateProduct = () => {
     onError: () => {
       toast.error('상품 등록에 실패했습니다.');
     },
+  });
+};
+
+export const useGetProducts = (pageNumber: number = 1, pageSize: number = 10) => {
+  return useQuery({
+    queryKey: [PRODUCT_QUERY_KEY, pageNumber, pageSize],
+    queryFn: () => productApi.getProducts({ pageNumber, pageSize }),
   });
 };
