@@ -5,6 +5,7 @@ import { BASE_URL } from '../utils/apiUrl';
 export const ProductApis = {
   getProducts: '/api/admin/v1/products',
   createProduct: '/api/admin/v1/products',
+  getProductById: (id: string) => `/api/admin/v1/products/${id}`,
 } as const;
 
 export interface CreateProductData {
@@ -76,6 +77,21 @@ export interface Provider {
 }
 
 export const productApi = {
+  // 상품 상세 조회
+  getProductById: async (productId: string) => {
+    const response = await fetchWithAuth(`${BASE_URL}${ProductApis.getProductById(productId)}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch product details');
+    }
+    return response.json();
+  },
+
   // 상품 목록 조회
   getProducts: async ({ pageSize = 10, pageNumber = 1 } = {}) => {
     const queryParams = new URLSearchParams({

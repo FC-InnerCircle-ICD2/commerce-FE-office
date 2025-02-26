@@ -25,3 +25,11 @@ export const useGetProducts = (pageNumber: number = 1, pageSize: number = 10) =>
     queryFn: () => productApi.getProducts({ pageNumber, pageSize }),
   });
 };
+
+export const useGetProductById = (productId: string) => {
+  return useQuery({
+    queryKey: [PRODUCT_QUERY_KEY, 'detail', productId],
+    queryFn: () => productApi.getProductById(productId),
+    enabled: !!productId,
+  });
+};

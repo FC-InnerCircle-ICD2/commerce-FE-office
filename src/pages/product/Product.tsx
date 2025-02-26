@@ -75,7 +75,11 @@ export default function Product() {
               </thead>
               <tbody className="divide-y divide-gray-200">
                 {products.map((product: Product) => (
-                  <tr key={product.id} className="hover:bg-gray-50">
+                  <tr 
+                    key={product.id} 
+                    className="hover:bg-gray-50 cursor-pointer" 
+                    onClick={() => navigate(`/product/${product.id}`)}
+                  >
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{product.id}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{product.name}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
