@@ -195,14 +195,6 @@ export default function ProductRegister() {
         />
 
         <FormInput
-          id="providerId"
-          label="공급자 ID"
-          register={form.register('providerId')}
-          error={form.formState.errors.providerId?.message}
-          placeholder="공급자 ID를 입력해주세요"
-        />
-
-        <FormInput
           id="categoryId"
           label="카테고리 ID"
           register={form.register('categoryId')}
