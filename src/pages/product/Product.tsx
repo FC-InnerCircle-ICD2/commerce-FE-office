@@ -13,15 +13,16 @@ interface Product {
   mainImageUrl: string;
 }
 
-interface ProductResponse {
-  content: Product[];
-  pageable: {
-    pageNumber: number;
-    pageSize: number;
-  };
+interface Page {
+  size: number;
   totalElements: number;
   totalPages: number;
-  last: boolean;
+  number: number;
+}
+
+interface ProductResponse {
+  content: Product[];
+  page: Page;
 }
 
 export default function Product() {
@@ -40,9 +41,7 @@ export default function Product() {
 
   const response = data as ProductResponse;
   const products = response?.content || [];
-
-  // totalPages가 없는 경우를 대비해 직접 계산
-  const totalPages = response?.totalPages || 63;
+  const totalPages = Math.ceil(response.page.totalElements / 10);
 
   const handlePageChange = (newPage: number) => setPage(newPage);
 
