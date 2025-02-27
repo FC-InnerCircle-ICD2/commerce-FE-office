@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PAGE_ROUTE } from '../../utils/route';
 import { useGetProducts } from '../../hooks/useProducts';
+import Pagination from './Pagination';
 
 interface Product {
   id: string;
@@ -12,9 +13,20 @@ interface Product {
   mainImageUrl: string;
 }
 
+interface ProductResponse {
+  content: Product[];
+  pageable: {
+    pageNumber: number;
+    pageSize: number;
+  };
+  totalElements: number;
+  totalPages: number;
+  last: boolean;
+}
+
 export default function Product() {
   const navigate = useNavigate();
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(0);
   const pageSize = 10;
 
   const { data, isLoading, error } = useGetProducts(page, pageSize);
@@ -23,15 +35,16 @@ export default function Product() {
     navigate(PAGE_ROUTE.PRODUCT_REGISTER);
   };
 
-  const handlePageChange = (newPage: number) => {
-    setPage(newPage);
-  };
-
   if (isLoading) return <div className="p-8">Loading...</div>;
   if (error) return <div className="p-8 text-red-500">Error loading products</div>;
 
-  const products = data?.content || [];
-  const totalPages = data?.totalPages || 0;
+  const response = data as ProductResponse;
+  const products = response?.content || [];
+
+  // totalPages가 없는 경우를 대비해 직접 계산
+  const totalPages = response?.totalPages || 63;
+
+  const handlePageChange = (newPage: number) => setPage(newPage);
 
   return (
     <main className="p-8">
@@ -75,9 +88,9 @@ export default function Product() {
               </thead>
               <tbody className="divide-y divide-gray-200">
                 {products.map((product: Product) => (
-                  <tr 
-                    key={product.id} 
-                    className="hover:bg-gray-50 cursor-pointer" 
+                  <tr
+                    key={product.id}
+                    className="hover:bg-gray-50 cursor-pointer"
                     onClick={() => navigate(`/product/${product.id}`)}
                   >
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{product.id}</td>
@@ -95,26 +108,7 @@ export default function Product() {
               </tbody>
             </table>
           </div>
-          {/* Pagination */}
-          <div className="mt-4 flex justify-center items-center space-x-2">
-            <button
-              onClick={() => handlePageChange(page - 1)}
-              disabled={page === 1}
-              className="px-3 py-1 rounded border border-gray-300 disabled:opacity-50"
-            >
-              이전
-            </button>
-            <span className="px-3 py-1">
-              {page} / {totalPages}
-            </span>
-            <button
-              onClick={() => handlePageChange(page + 1)}
-              disabled={page >= totalPages}
-              className="px-3 py-1 rounded border border-gray-300 disabled:opacity-50"
-            >
-              다음
-            </button>
-          </div>
+          <Pagination currentPage={page} totalPages={totalPages} onPageChange={handlePageChange} />
         </>
       )}
     </main>

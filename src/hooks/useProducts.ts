@@ -19,10 +19,10 @@ export const useCreateProduct = () => {
   });
 };
 
-export const useGetProducts = (pageNumber: number = 1, pageSize: number = 10) => {
+export const useGetProducts = (pageNumber: number, pageSize: number = 10) => {
   return useQuery({
     queryKey: [PRODUCT_QUERY_KEY, pageNumber, pageSize],
-    queryFn: () => productApi.getProducts({ pageNumber, pageSize }),
+    queryFn: () => productApi.getProducts(pageNumber, pageSize),
   });
 };
 

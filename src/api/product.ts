@@ -93,10 +93,10 @@ export const productApi = {
   },
 
   // 상품 목록 조회
-  getProducts: async ({ pageSize = 10, pageNumber = 1 } = {}) => {
+  getProducts: async (pageNumber: number, pageSize: number = 10) => {
     const queryParams = new URLSearchParams({
-      size: pageSize.toString(),
-      page: (pageNumber - 1).toString(),
+      pageNumber: pageNumber.toString(),
+      pageSize: pageSize.toString(),
     });
 
     const response = await fetchWithAuth(`${BASE_URL}${ProductApis.getProducts}?${queryParams}`, {
