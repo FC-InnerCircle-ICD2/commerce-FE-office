@@ -6,6 +6,7 @@ export const ProductApis = {
   getProducts: '/api/admin/v1/products',
   createProduct: '/api/admin/v1/products',
   getProductById: (id: string) => `/api/admin/v1/products/${id}`,
+  deleteProduct: (id: string) => `/api/admin/v1/products/${id}`,
 } as const;
 
 export interface CreateProductData {
@@ -125,5 +126,16 @@ export const productApi = {
     }
 
     return response.json();
+  },
+
+  // 상품 삭제
+  deleteProduct: async (productId: string) => {
+    const response = await fetchWithAuth(`${BASE_URL}${ProductApis.deleteProduct(productId)}`, {
+      method: 'DELETE',
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to delete product');
+    }
   },
 };

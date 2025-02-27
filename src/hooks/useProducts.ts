@@ -33,3 +33,18 @@ export const useGetProductById = (productId: string) => {
     enabled: !!productId,
   });
 };
+
+export const useDeleteProduct = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: productApi.deleteProduct,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [PRODUCT_QUERY_KEY] });
+      toast.success('상품이 삭제되었습니다.');
+    },
+    onError: () => {
+      toast.error('상품 삭제에 실패했습니다.');
+    },
+  });
+};
