@@ -9,6 +9,7 @@ import Order from './pages/order/Order';
 import Login from './pages/login/Login';
 import Join from './pages/join/Join';
 import { AuthProvider } from './authContext';
+import BannerDetail from './pages/banner/BannerDetail';
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
           <Route path={PAGE_ROUTE.PRODUCT_REGISTER} element={<ProductRegister />} />
           <Route path={PAGE_ROUTE.BANNER} element={<Banner />} />
           <Route path={PAGE_ROUTE.BANNER_REGISTER} element={<BannerRegister />} />
+          <Route path={`${PAGE_ROUTE.BANNER}/:bannerID`} element={<BannerDetail />} />
           <Route path={PAGE_ROUTE.ORDER} element={<Order />} />
           <Route path="*" element={<Navigate to={PAGE_ROUTE.PRODUCT} />} />
         </Route>

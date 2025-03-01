@@ -13,3 +13,24 @@ export const bannerFormSchema = z.object({
   productId: z.coerce.number().optional(),
   linkUrl: z.string().optional(),
 });
+
+export const bannerDetailSchema = z.object({
+  id: z.number().min(1, 'ID must be a positive number'),
+  title: z.string().min(1, 'Title is required'),
+  description: z.string().min(1, 'Description is required'),
+  bannerOrder: z.number().min(0, 'Banner order must be a positive number'),
+  iconUrl: z.string().url('Invalid URL format'),
+  bannerImageUrl: z.string().url('Invalid URL format'),
+  bannerType: z.enum(['PRODUCT', 'CATEGORY', 'EVENT']),
+  startDate: z.string().min(1, 'Start date is required'),
+  endDate: z.string().min(1, 'End date is required'),
+  createdAt: z.string().min(1, 'Created date is required'),
+  updatedAt: z.string().min(1, 'Updated date is required'),
+  isDeleted: z.boolean(),
+  productBannerResponse: z.object({
+    id: z.number().min(1, 'Product Banner ID must be a positive number'),
+    linkUrl: z.string().url('Invalid URL format'),
+    linkType: z.string().min(1, 'Link type is required'),
+    productId: z.number().min(0, 'Product ID must be a positive number'),
+  }),
+});

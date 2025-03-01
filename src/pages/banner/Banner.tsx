@@ -9,6 +9,10 @@ export default function Banner() {
     navigate(PAGE_ROUTE.BANNER_REGISTER);
   };
 
+  const handleListClick = (id: number) => {
+    navigate(`${PAGE_ROUTE.BANNER}/${id}`);
+  };
+
   return (
     <div className="flex flex-col gap-5 p-8 w-full items-end">
       <button
@@ -23,6 +27,7 @@ export default function Banner() {
           {dummy.map((banner) => (
             <li
               key={banner.id}
+              onClick={() => handleListClick(banner.id)}
               className="p-4 rounded-md flex justify-between items-center cursor-pointer hover:bg-slate-200 "
             >
               <span className="text-lg font-medium w-1/4">{banner.title}</span>
