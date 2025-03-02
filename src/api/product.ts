@@ -7,6 +7,7 @@ export const ProductApis = {
   createProduct: '/api/admin/v1/products',
   getProductById: (id: string) => `/api/admin/v1/products/${id}`,
   deleteProduct: (id: string) => `/api/admin/v1/products/${id}`,
+  updateProduct: (id: string) => `/api/admin/v1/products/${id}`,
 } as const;
 
 export interface CreateProductData {
@@ -48,7 +49,7 @@ const createFormData = (data: CreateProductData) => {
       formData.append(`options[${index}].name`, option.name);
       option.optionDetails.forEach((detail, detailIndex) => {
         formData.append(`options[${index}].optionDetails[${detailIndex}].value`, detail.value);
-        formData.append(`options[${index}].optionDetails[${detailIndex}].optionOrder`, detail.optionOrder.toString());
+        formData.append(`options[${index}].optionDetails[${detailIndex}].optionOrder`, String(detailIndex + 1));
         formData.append(
           `options[${index}].optionDetails[${detailIndex}].additionalPrice`,
           detail.additionalPrice.toString(),
@@ -128,9 +129,35 @@ export const productApi = {
     return response.json();
   },
 
+  // 상품 수정
+  updateProduct: async (productId: bigint, data: CreateProductData) => {
+    const formData = createFormData(data);
+    const response = await fetchWithAuth(`${BASE_URL}${ProductApis.updateProduct(String(productId))}`, {
+      method: 'PATCH',
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to edit product');
+    }
+
+    const contentType = response.headers.get('content-type');
+    if (contentType && contentType.indexOf('application/json') !== -1) {
+      try {
+        return await response.json();
+      } catch (error) {
+        console.error('JSON 파싱 오류:', error);
+        return null; // 또는 적절한 기본값 반환
+      }
+    } else {
+      console.log('서버에서 JSON이 아닌 응답을 받았습니다.');
+      return null; // 또는 적절한 기본값 반환
+    }
+  },
+
   // 상품 삭제
-  deleteProduct: async (productId: string) => {
-    const response = await fetchWithAuth(`${BASE_URL}${ProductApis.deleteProduct(productId)}`, {
+  deleteProduct: async (productId: bigint) => {
+    const response = await fetchWithAuth(`${BASE_URL}${ProductApis.deleteProduct(String(productId))}`, {
       method: 'DELETE',
     });
 

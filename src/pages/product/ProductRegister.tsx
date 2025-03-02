@@ -8,7 +8,7 @@ import { toast } from 'react-toastify';
 import FormInput from '../../components/common/FormInput';
 
 import { PAGE_ROUTE } from '../../utils/route';
-import { useCreateProduct, useGetProductById } from '../../hooks/useProducts';
+import { useCreateProduct, useGetProductById, useUpdateProduct } from '../../hooks/useProducts';
 import { useProductImages } from '../../hooks/product/useProductImages';
 import { useProductOptions } from '../../hooks/product/useProductOptions';
 import { productFormSchema } from '../../utils/zod/productSchema';
@@ -39,6 +39,9 @@ export default function ProductRegister() {
   const { data: productData } = useGetProductById(isEdit && productId ? productId : '');
 
   const { mutate: createProductMutation, isPending: isCreatePending } = useCreateProduct();
+
+  const { mutate: updateProductMutation } = useUpdateProduct();
+
   const {
     mainImage,
     mainImagePreview,
@@ -67,7 +70,6 @@ export default function ProductRegister() {
       name: '',
       description: '',
       price: '',
-      providerId: '',
       categoryId: '',
       options: [],
       mainImage: null,
@@ -82,8 +84,7 @@ export default function ProductRegister() {
         name: productData.name || '',
         description: productData.description || '',
         price: productData.price ? productData.price.toString() : '0',
-        providerId: productData.provider?.id || '',
-        categoryId: productData.category?.id || '',
+        categoryId: String(productData.category?.id) || '',
         options: [],
         mainImage: null,
         detailImages: [],
@@ -141,7 +142,11 @@ export default function ProductRegister() {
     };
 
     if (isEdit) {
-      // TODO: 상품 수정 로직 추가
+      const productIdBigInt = productId ? BigInt(productId) : BigInt(0);
+
+      if (productIdBigInt) {
+        updateProductMutation({ productId: productIdBigInt, data: formData });
+      }
     } else {
       createProductMutation(formData, { onSuccess });
     }

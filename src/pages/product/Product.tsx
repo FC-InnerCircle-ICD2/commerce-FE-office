@@ -46,6 +46,10 @@ export default function Product() {
 
   const handlePageChange = (newPage: number) => setPage(newPage);
 
+  const handleDeleteProduct = (productId: string) => {
+    deleteProduct.mutate(BigInt(productId));
+  };
+
   return (
     <main className="p-8">
       <div className="flex justify-between items-center mb-6">
@@ -110,7 +114,7 @@ export default function Product() {
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          deleteProduct.mutate(product.id);
+                          handleDeleteProduct(product.id);
                         }}
                         className="px-2 py-1 bg-red-500 text-white rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 transition-colors"
                       >
