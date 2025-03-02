@@ -1,6 +1,9 @@
-import { getToken } from '../services/auth';
+import { fetchWithAuth } from '../utils/fetchWithAuth';
+import { BASE_URL } from '../utils/apiUrl';
 
-const BASE_URL = 'http://3.38.23.68:8080/api/admin/v1/banners';
+export const BannerApis = {
+  createBanner: '/api/admin/v1/banners',
+} as const;
 
 export const BANNER_TYPE = {
   PRODUCT: 'PRODUCT',
@@ -56,21 +59,13 @@ const createFormData = (data: CreateBannerData) => {
 export const bannerApi = {
   // 배너 등록
   createBanner: async (data: CreateBannerData) => {
-    const token = getToken();
-
-    const headers = {
-      Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json',
-    };
-    const formData = createFormData(data);
-    const response = await fetch(BASE_URL, {
+    const response = await fetchWithAuth(`${BASE_URL}${BannerApis.createBanner}`, {
       method: 'POST',
-      body: formData,
-      headers,
+      body: createFormData(data),
     });
 
     if (!response.ok) {
-      throw new Error('배너 등록에 실패했습니다');
+      throw new Error('배너 등록에 실패했습니다.');
     }
 
     return response.json();
