@@ -13,6 +13,7 @@ import { useProductImages } from '../../hooks/product/useProductImages';
 import { useProductOptions } from '../../hooks/product/useProductOptions';
 import { productFormSchema } from '../../utils/zod/productSchema';
 import { ProductFormValues } from '../../types/product';
+import ComboBox from '../../components/ui/ComboBox';
 
 interface OptionDetail {
   value: string;
@@ -170,18 +171,19 @@ export default function ProductRegister() {
         <FormInput
           id="name"
           label="상품명"
-          register={form.register('name')}
+          register={form.register('name', { required: '상품명은 필수 입력 사항입니다.' })}
           error={form.formState.errors.name?.message}
           placeholder="상품명을 입력해주세요"
+          required
         />
 
         <div className="space-y-2">
           <label htmlFor="description" className="block text-sm font-medium text-gray-700">
-            상품 설명
+            상품 설명 <span className="text-red-500">*</span>
           </label>
           <textarea
             id="description"
-            {...form.register('description')}
+            {...form.register('description', { required: '상품 설명은 필수 입력 사항입니다.' })}
             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none h-32"
             placeholder="상품 설명을 입력해주세요"
           />
@@ -194,21 +196,25 @@ export default function ProductRegister() {
           id="price"
           type="number"
           label="가격"
-          register={form.register('price')}
+          register={form.register('price', { required: '가격은 필수 입력 사항입니다.' })}
           error={form.formState.errors.price?.message}
           placeholder="가격을 입력해주세요"
+          required
         />
 
-        <FormInput
+        <ComboBox
           id="categoryId"
-          label="카테고리 ID"
-          register={form.register('categoryId')}
+          label="카테고리"
+          register={form.register}
           error={form.formState.errors.categoryId?.message}
-          placeholder="카테고리 ID를 입력해주세요"
+          setValue={form.setValue}
         />
+
         <div className="mt-6 space-y-4">
           <div className="flex justify-between items-center mb-4">
-            <h3 className="text-lg font-semibold">상품 옵션</h3>
+            <h3 className="text-lg font-semibold">
+              상품 옵션 <span className="text-red-500">*</span>
+            </h3>
             <button
               type="button"
               onClick={addOption}
@@ -248,7 +254,6 @@ export default function ProductRegister() {
                   </button>
                 </div>
               </div>
-
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
@@ -315,7 +320,7 @@ export default function ProductRegister() {
 
         <div className="space-y-2">
           <label htmlFor="mainImage" className="block text-sm font-medium text-gray-700">
-            메인 이미지
+            메인 이미지 <span className="text-red-500">*</span>
           </label>
           <div className="flex flex-col gap-2">
             <input
@@ -346,7 +351,7 @@ export default function ProductRegister() {
 
         <div className="space-y-2">
           <label htmlFor="detailImages" className="block text-sm font-medium text-gray-700">
-            상세 이미지
+            상세 이미지 <span className="text-red-500">*</span>
           </label>
           <div className="flex flex-col gap-2">
             <input
