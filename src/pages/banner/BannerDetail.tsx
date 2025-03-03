@@ -3,14 +3,19 @@ import { bannerDetailSchema } from '../../utils/zod/bannerSchema';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useParams } from 'react-router';
-import { useBannerDetail, useDeleteBanner } from '../../hooks/useBanner';
+import { useBannerDetail, useDeleteBanner, useUpdateBanner } from '../../hooks/useBanner';
 import { useEffect } from 'react';
+import { useNavigate } from 'react-router';
+import { PAGE_ROUTE } from '../../utils/route';
+import FormInput from '../../components/common/FormInput';
 
 type BannerFormType = z.infer<typeof bannerDetailSchema>;
 
 export default function BannerDetail() {
+  const nav = useNavigate();
   const param = useParams<{ bannerID: string }>();
   const { bannerDetail } = useBannerDetail(param.bannerID ?? '');
+  const { updateBannerMutate } = useUpdateBanner(() => nav(PAGE_ROUTE.BANNER));
   const { deleteBannerMutate } = useDeleteBanner();
   const {
     register,
@@ -49,8 +54,7 @@ export default function BannerDetail() {
         formData.append(key, String(value));
       }
     });
-
-    console.log('FormData Entries:', Array.from(formData.entries()));
+    updateBannerMutate(formData);
   };
 
   return (
@@ -124,15 +128,23 @@ export default function BannerDetail() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium">Start Date</label>
-            <input {...register('startDate')} className="w-full p-2 border rounded" />
-            {errors.startDate && <p className="text-red-500 text-sm">{errors.startDate.message}</p>}
+            <FormInput
+              label="Start Date"
+              type="datetime-local"
+              register={register('startDate')}
+              error={errors.startDate?.message}
+              value={watch('startDate') ? new Date(watch('startDate')).toISOString().slice(0, 16) : ''}
+            />
           </div>
 
           <div>
-            <label className="block text-sm font-medium">End Date</label>
-            <input {...register('endDate')} className="w-full p-2 border rounded" />
-            {errors.endDate && <p className="text-red-500 text-sm">{errors.endDate.message}</p>}
+            <FormInput
+              label="End Date"
+              type="datetime-local"
+              register={register('endDate')}
+              error={errors.endDate?.message?.toString()}
+              value={watch('endDate') ? new Date(watch('endDate')).toISOString().slice(0, 16) : ''}
+            />
           </div>
 
           <div>

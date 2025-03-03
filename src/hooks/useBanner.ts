@@ -52,6 +52,23 @@ export const useCreateBanner = (onSuccess?: () => void) => {
   });
 };
 
+export const useUpdateBanner = (onSuccess: () => void) => {
+  const queryClient = useQueryClient();
+  const { mutate: updateBannerMutate } = useMutation({
+    mutationFn: bannerApi.updateBanner,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [BANNER_QUERY_KEY] });
+      toast.success('배너가 수정되었습니다.');
+      onSuccess();
+    },
+    onError: () => {
+      toast.error('배너 수정에 실패했습니다.');
+    },
+  });
+
+  return { updateBannerMutate };
+};
+
 export const useDeleteBanner = () => {
   const queryClient = useQueryClient();
   const { mutate: deleteBannerMutate } = useMutation({

@@ -102,4 +102,18 @@ export const bannerApi = {
     const data = await response.json();
     return data;
   },
+  // 배너 수정
+  updateBanner: async (data: FormData) => {
+    console.log(data);
+    const response = await fetchWithAuth(`${BASE_URL}${BannerApis.createBanner}/${data.get('id')}`, {
+      method: 'PUT',
+      body: data,
+    });
+
+    if (!response.ok) {
+      throw new Error('배너 수정에 실패했습니다.');
+    }
+
+    return response.json();
+  },
 };
