@@ -1,5 +1,6 @@
 import { fetchWithAuth } from '../utils/fetchWithAuth';
 import { BASE_URL } from '../utils/apiUrl';
+import { IBanner } from '../hooks/useBanner';
 
 export const BannerApis = {
   createBanner: '/api/admin/v1/banners',
@@ -60,5 +61,16 @@ export const bannerApi = {
     }
 
     return response.json();
+  },
+  // 배너 조회
+  getBanner: async (): Promise<IBanner[]> => {
+    const response = await fetchWithAuth(`${BASE_URL}${BannerApis.createBanner}`);
+
+    if (!response.ok) {
+      throw new Error('배너 조회에 실패했습니다');
+    }
+
+    const data: IBanner[] = await response.json();
+    return data;
   },
 };

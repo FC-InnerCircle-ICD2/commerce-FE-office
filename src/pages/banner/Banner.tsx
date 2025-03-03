@@ -1,8 +1,9 @@
 import { useNavigate } from 'react-router-dom';
 import { PAGE_ROUTE } from '../../utils/route';
-import { dummy } from '../../services/mocking';
+import { useBanner } from '../../hooks/useBanner';
 
 export default function Banner() {
+  const { banners } = useBanner();
   const navigate = useNavigate();
 
   const handleRegisterClick = () => {
@@ -30,7 +31,7 @@ export default function Banner() {
             <span className="text-xs font-semibold text-gray-600 w-1/4">시작일</span>
             <span className="text-xs font-semibold text-gray-600 w-1/4">종료일</span>
           </li>
-          {dummy.map((banner) => (
+          {banners?.map((banner) => (
             <li
               key={banner.id}
               onClick={() => handleListClick(banner.id)}
