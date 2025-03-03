@@ -51,3 +51,19 @@ export const useCreateBanner = (onSuccess?: () => void) => {
     },
   });
 };
+
+export const useDeleteBanner = () => {
+  const queryClient = useQueryClient();
+  const { mutate: deleteBannerMutate } = useMutation({
+    mutationFn: bannerApi.deleteBanner,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [BANNER_QUERY_KEY] });
+      toast.success('배너가 삭제되었습니다');
+    },
+    onError: () => {
+      toast.error('배너 삭제에 실패했습니다');
+    },
+  });
+
+  return { deleteBannerMutate };
+};

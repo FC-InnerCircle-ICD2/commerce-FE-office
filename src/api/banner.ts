@@ -88,4 +88,18 @@ export const bannerApi = {
     const data: IBannerDetail = await response.json();
     return data;
   },
+  // 배너 삭제
+  deleteBanner: async (id: string) => {
+    const response = await fetchWithAuth(`${BASE_URL}${BannerApis.createBanner}/${id}`, {
+      method: 'DELETE',
+    });
+
+    console.log(response);
+    if (!response.ok) {
+      throw new Error('배너 삭제에 실패했습니다');
+    }
+
+    const data = await response.json();
+    return data;
+  },
 };

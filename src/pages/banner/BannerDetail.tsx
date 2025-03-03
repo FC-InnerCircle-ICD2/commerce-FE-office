@@ -3,7 +3,7 @@ import { bannerDetailSchema } from '../../utils/zod/bannerSchema';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useParams } from 'react-router';
-import { useBannerDetail } from '../../hooks/useBanner';
+import { useBannerDetail, useDeleteBanner } from '../../hooks/useBanner';
 import { useEffect } from 'react';
 
 type BannerFormType = z.infer<typeof bannerDetailSchema>;
@@ -11,6 +11,7 @@ type BannerFormType = z.infer<typeof bannerDetailSchema>;
 export default function BannerDetail() {
   const param = useParams<{ bannerID: string }>();
   const { bannerDetail } = useBannerDetail(param.bannerID ?? '');
+  const { deleteBannerMutate } = useDeleteBanner();
   const {
     register,
     handleSubmit,
@@ -170,9 +171,18 @@ export default function BannerDetail() {
             )}
           </div>
 
-          <button type="submit" className="w-full p-2 bg-blue-500 text-white rounded hover:bg-blue-600">
-            Update Banner
-          </button>
+          <div className="flex flex-col gap-1">
+            <button
+              type="button"
+              className="w-full p-2 bg-red-500 text-white rounded hover:bg-red-600"
+              onClick={() => deleteBannerMutate(String(bannerDetail?.id ?? ''))}
+            >
+              배너 삭제
+            </button>
+            <button type="submit" className="w-full p-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+              배너 수정
+            </button>
+          </div>
         </form>
       </div>
     </section>
