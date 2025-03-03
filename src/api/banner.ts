@@ -20,7 +20,7 @@ export interface CreateBannerData {
   startDate: string;
   endDate: string;
   isDeleted: boolean;
-  productId?: number;
+  productId?: bigint;
   linkUrl?: string;
   linkType?: string;
   bannerImage?: File | null;

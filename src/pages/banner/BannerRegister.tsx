@@ -17,6 +17,7 @@ export default function BannerRegister() {
   const {
     register,
     handleSubmit: handleFormSubmit,
+    setValue,
     watch,
     formState: { errors },
   } = useForm<CreateBannerData>({
@@ -28,7 +29,7 @@ export default function BannerRegister() {
       bannerOrder: 0,
       startDate: '',
       endDate: '',
-      productId: 0,
+      productId: 0n,
       linkUrl: '',
       linkType: 'internal',
     },
@@ -49,15 +50,15 @@ export default function BannerRegister() {
   };
 
   const onSubmit = (values: CreateBannerData) => {
-    createBannerMutation(
-      {
-        ...values,
-        bannerImage,
-        iconImage,
-        linkType: 'internal',
-      },
-      { onSuccess },
-    );
+    const updatedValues = {
+      ...values,
+      productId: values.productId !== undefined ? BigInt(values.productId) : 0n, // undefined 체크 후 BigInt로 변환
+      bannerImage,
+      iconImage,
+      linkType: 'internal',
+    };
+
+    createBannerMutation(updatedValues, { onSuccess });
   };
 
   return (
@@ -155,22 +156,19 @@ export default function BannerRegister() {
         </div>
       </div>
 
-      <FormInput label="상품 ID" type="number" register={register('productId', { required: true })} />
+      <FormInput
+        label="상품 ID"
+        type="text"
+        register={register('productId', { required: true })}
+        placeholder="상품 ID를 입력해주세요"
+        onChange={(e) => {
+          const value = e.target.value;
+          const parsedValue = value ? BigInt(value) : 0n;
+          setValue('productId', parsedValue);
+        }}
+      />
 
       <FormInput label="링크 URL" type="url" register={register('linkUrl')} placeholder="배너 url을 입력해주세요" />
-
-      {/* <div className="flex flex-col gap-2">
-        <label className="font-medium">링크 타입</label>
-        <select
-          {...register('linkType')}
-          value={watch('linkType')}
-          className="border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          <option value="">선택하세요</option>
-          <option value="INTERNAL">내부</option>
-          <option value="EXTERNAL">외부</option>
-        </select>
-      </div> */}
 
       <div className="flex flex-col gap-2">
         <label className="font-medium">배너 이미지</label>
