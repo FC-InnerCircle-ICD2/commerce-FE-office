@@ -1,6 +1,9 @@
-import { getToken } from '../services/auth';
+import { fetchWithAuth } from '../utils/fetchWithAuth';
+import { BASE_URL } from '../utils/apiUrl';
 
-const BASE_URL = 'http://3.38.23.68:8080/api/admin/v1/banners';
+export const BannerApis = {
+  createBanner: '/api/admin/v1/banners',
+} as const;
 
 export const BANNER_TYPE = {
   PRODUCT: 'PRODUCT',
@@ -17,37 +20,28 @@ export interface CreateBannerData {
   startDate: string;
   endDate: string;
   isDeleted: boolean;
-  productId?: number;
+  productId?: bigint;
   linkUrl?: string;
   linkType?: string;
   bannerImage?: File | null;
   iconImage?: File | null;
 }
 
+const formatDate = (dateString: string) => {
+  return dateString.slice(0, 19);
+};
+
 const createFormData = (data: CreateBannerData) => {
   const formData = new FormData();
 
-  // Form fields
   Object.entries(data).forEach(([key, value]) => {
-    if (value === null || value === undefined || value === '') return;
-
-    // Handle files separately
-    if (key === 'bannerImage' || key === 'iconImage') {
-      if (value instanceof File) {
-        formData.append(key, value);
-      }
-      return;
+    if (key === 'startDate' || key === 'endDate') {
+      formData.append(key, formatDate(value as string));
+    } else if (value instanceof File) {
+      formData.append(key, value);
+    } else {
+      formData.append(key, String(value));
     }
-
-    // Handle dates
-    if ((key === 'startDate' || key === 'endDate') && typeof value === 'string') {
-      const date = new Date(value);
-      formData.append(key, date.toISOString());
-      return;
-    }
-
-    // Handle other fields
-    formData.append(key, value.toString());
   });
 
   return formData;
@@ -56,21 +50,13 @@ const createFormData = (data: CreateBannerData) => {
 export const bannerApi = {
   // 배너 등록
   createBanner: async (data: CreateBannerData) => {
-    const token = getToken();
-
-    const headers = {
-      Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json',
-    };
-    const formData = createFormData(data);
-    const response = await fetch(BASE_URL, {
+    const response = await fetchWithAuth(`${BASE_URL}${BannerApis.createBanner}`, {
       method: 'POST',
-      body: formData,
-      headers,
+      body: createFormData(data),
     });
 
     if (!response.ok) {
-      throw new Error('배너 등록에 실패했습니다');
+      throw new Error('배너 등록에 실패했습니다.');
     }
 
     return response.json();
