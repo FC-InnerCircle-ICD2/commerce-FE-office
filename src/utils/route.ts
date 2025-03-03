@@ -3,6 +3,7 @@ export const PAGE_ROUTE = {
   JOIN: '/join',
   PRODUCT: '/product',
   PRODUCT_REGISTER: '/product/0',
+  PRODUCT_DETAIL: (id: string) => `/product/${id}`,
   BANNER: '/banner',
   BANNER_REGISTER: '/banner/0',
   ORDER: '/order',

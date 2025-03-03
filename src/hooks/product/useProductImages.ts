@@ -45,8 +45,10 @@ export const useProductImages = () => {
   return {
     mainImage,
     mainImagePreview,
+    setMainImagePreview,
     detailImages,
     detailImagePreviews,
+    setDetailImagePreviews,
     handleFileChange,
     removeDetailImage,
     removeMainImage,

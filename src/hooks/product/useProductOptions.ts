@@ -62,6 +62,7 @@ export const useProductOptions = () => {
 
   return {
     options,
+    setOptions,
     addOption,
     removeOption,
     addOptionDetail,

@@ -7,11 +7,11 @@ interface FormInputProps extends InputHTMLAttributes<HTMLInputElement> {
   error?: string;
 }
 
-export default function FormInput({ label, register, error, ...props }: FormInputProps) {
+export default function FormInput({ label, register, error, required, ...props }: FormInputProps) {
   return (
     <div className="space-y-2">
       <label htmlFor={props.id} className="block text-sm font-medium text-gray-700">
-        {label}
+        {label} {required && <span className="text-red-500">*</span>}
       </label>
       <input
         {...props}
