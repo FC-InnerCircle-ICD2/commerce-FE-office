@@ -1,32 +1,62 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useEffect } from 'react';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-
+import { toast } from 'react-toastify';
 import FormInput from '../../components/common/FormInput';
 
 import { PAGE_ROUTE } from '../../utils/route';
-import { useCreateProduct } from '../../hooks/useProducts';
+import { useCreateProduct, useGetProductById, useUpdateProduct } from '../../hooks/useProducts';
 import { useProductImages } from '../../hooks/product/useProductImages';
 import { useProductOptions } from '../../hooks/product/useProductOptions';
 import { productFormSchema } from '../../utils/zod/productSchema';
 import { ProductFormValues } from '../../types/product';
+import ComboBox from '../../components/ui/ComboBox';
+
+interface OptionDetail {
+  value: string;
+  optionOrder: number;
+  additionalPrice: number;
+}
+
+interface Option {
+  name: string;
+  optionDetails: OptionDetail[];
+}
+
+interface ProductImage {
+  productImageType: string;
+  fileOrder: number;
+  imageUrl: string;
+}
 
 export default function ProductRegister() {
   const navigate = useNavigate();
-  const { mutate: createProductMutation, isPending } = useCreateProduct();
+  const { productId } = useParams<{ productId: string }>();
+  const isEdit = productId !== '0';
+
+  const { data: productData } = useGetProductById(isEdit && productId ? productId : '');
+
+  const { mutate: createProductMutation, isPending: isCreatePending } = useCreateProduct();
+
+  const { mutate: updateProductMutation } = useUpdateProduct();
+
   const {
     mainImage,
     mainImagePreview,
+    setMainImagePreview,
     detailImages,
     detailImagePreviews,
+    setDetailImagePreviews,
     handleFileChange,
     removeDetailImage,
     removeMainImage,
   } = useProductImages();
   const {
     options,
+    setOptions,
     addOption,
     removeOption,
     addOptionDetail,
@@ -41,7 +71,6 @@ export default function ProductRegister() {
       name: '',
       description: '',
       price: '',
-      providerId: '',
       categoryId: '',
       options: [],
       mainImage: null,
@@ -49,20 +78,79 @@ export default function ProductRegister() {
     },
   });
 
+  useEffect(() => {
+    if (productData && isEdit) {
+      // 폼 데이터 설정
+      form.reset({
+        name: productData.name || '',
+        description: productData.description || '',
+        price: productData.price ? productData.price.toString() : '0',
+        categoryId: String(productData.category?.id) || '',
+        options: [],
+        mainImage: null,
+        detailImages: [],
+      });
+
+      // 옵션 데이터 설정
+      if (productData.options && productData.options.length > 0) {
+        const formattedOptions: Option[] = productData.options.map((option: Option) => ({
+          name: option.name,
+          optionDetails: option.optionDetails.map((detail: OptionDetail) => ({
+            value: detail.value,
+            optionOrder: detail.optionOrder,
+            additionalPrice: detail.additionalPrice,
+          })),
+        }));
+        setOptions(formattedOptions);
+      } else {
+        setOptions([]);
+      }
+
+      // 이미지 미리보기 설정
+      const mainImageUrl = productData.images?.find(
+        (image: ProductImage) => image.productImageType === 'MAIN' && image.fileOrder === 0,
+      )?.imageUrl;
+      if (mainImageUrl) {
+        setMainImagePreview(mainImageUrl);
+      }
+
+      const detailImageUrls =
+        productData.images
+          ?.filter((image: ProductImage) => image.productImageType === 'DETAIL')
+          ?.sort((a: ProductImage, b: ProductImage) => a.fileOrder - b.fileOrder)
+          ?.map((image: ProductImage) => image.imageUrl) || [];
+      if (detailImageUrls.length > 0) {
+        setDetailImagePreviews(detailImageUrls);
+      }
+    }
+  }, [productData, isEdit, form, setOptions, setMainImagePreview, setDetailImagePreviews]);
+
   const onSuccess = () => {
     navigate(PAGE_ROUTE.PRODUCT);
   };
 
   const onSubmit = (values: ProductFormValues) => {
-    createProductMutation(
-      {
-        ...values,
-        mainImage,
-        detailImages,
-        options,
-      },
-      { onSuccess },
-    );
+    if (!mainImage && !isEdit) {
+      toast.error('메인 이미지를 선택해주세요.');
+      return;
+    }
+
+    const formData: ProductFormValues = {
+      ...values,
+      mainImage: mainImage || null,
+      detailImages: detailImages || [],
+      options: options || [],
+    };
+
+    if (isEdit) {
+      const productIdBigInt = productId ? BigInt(productId) : BigInt(0);
+
+      if (productIdBigInt) {
+        updateProductMutation({ productId: productIdBigInt, data: formData });
+      }
+    } else {
+      createProductMutation(formData, { onSuccess });
+    }
   };
 
   return (
@@ -83,18 +171,19 @@ export default function ProductRegister() {
         <FormInput
           id="name"
           label="상품명"
-          register={form.register('name')}
+          register={form.register('name', { required: '상품명은 필수 입력 사항입니다.' })}
           error={form.formState.errors.name?.message}
           placeholder="상품명을 입력해주세요"
+          required
         />
 
         <div className="space-y-2">
           <label htmlFor="description" className="block text-sm font-medium text-gray-700">
-            상품 설명
+            상품 설명 <span className="text-red-500">*</span>
           </label>
           <textarea
             id="description"
-            {...form.register('description')}
+            {...form.register('description', { required: '상품 설명은 필수 입력 사항입니다.' })}
             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none h-32"
             placeholder="상품 설명을 입력해주세요"
           />
@@ -107,29 +196,25 @@ export default function ProductRegister() {
           id="price"
           type="number"
           label="가격"
-          register={form.register('price')}
+          register={form.register('price', { required: '가격은 필수 입력 사항입니다.' })}
           error={form.formState.errors.price?.message}
           placeholder="가격을 입력해주세요"
+          required
         />
 
-        <FormInput
-          id="providerId"
-          label="공급자 ID"
-          register={form.register('providerId')}
-          error={form.formState.errors.providerId?.message}
-          placeholder="공급자 ID를 입력해주세요"
-        />
-
-        <FormInput
+        <ComboBox
           id="categoryId"
-          label="카테고리 ID"
-          register={form.register('categoryId')}
+          label="카테고리"
+          register={form.register}
           error={form.formState.errors.categoryId?.message}
-          placeholder="카테고리 ID를 입력해주세요"
+          setValue={form.setValue}
         />
+
         <div className="mt-6 space-y-4">
-          <div className="flex justify-between items-center">
-            <h3 className="text-lg font-semibold">상품 옵션</h3>
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-semibold">
+              상품 옵션 <span className="text-red-500">*</span>
+            </h3>
             <button
               type="button"
               onClick={addOption}
@@ -140,61 +225,94 @@ export default function ProductRegister() {
           </div>
 
           {options.map((option, optionIndex) => (
-            <div key={optionIndex} className="border p-4 rounded-lg space-y-4">
-              <div className="flex items-center space-x-4">
-                <input
-                  type="text"
-                  value={option.name}
-                  onChange={(e) => updateOptionName(optionIndex, e.target.value)}
-                  placeholder="옵션명 (예: 색상, 용량)"
-                  className="flex-1 p-2 border rounded"
-                />
-                <button
-                  type="button"
-                  onClick={() => removeOption(optionIndex)}
-                  className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
-                >
-                  삭제
-                </button>
+            <div key={optionIndex} className="border rounded-lg overflow-hidden mb-6">
+              <div className="bg-gray-50 p-4 flex items-center justify-between border-b">
+                <div className="flex items-center space-x-4 flex-1">
+                  <span className="font-medium">옵션 {optionIndex + 1}</span>
+                  <input
+                    type="text"
+                    value={option.name}
+                    onChange={(e) => updateOptionName(optionIndex, e.target.value)}
+                    placeholder="옵션명 (예: 색상, 용량)"
+                    className="flex-1 p-2 border rounded bg-white"
+                  />
+                </div>
+                <div className="flex items-center space-x-2">
+                  <button
+                    type="button"
+                    onClick={() => addOptionDetail(optionIndex)}
+                    className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm"
+                  >
+                    옵션값 추가
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => removeOption(optionIndex)}
+                    className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 text-sm"
+                  >
+                    삭제
+                  </button>
+                </div>
               </div>
-
-              <div className="space-y-2">
-                {option.optionDetails.map((detail, detailIndex) => (
-                  <div key={detailIndex} className="flex space-x-2 items-start">
-                    <input
-                      type="text"
-                      value={detail.value}
-                      onChange={(e) => updateOptionDetail(optionIndex, detailIndex, 'value', e.target.value)}
-                      placeholder="옵션값 (예: 빨강, 128GB)"
-                      className="flex-1 p-2 border rounded"
-                    />
-                    <div className="flex flex-col w-32">
-                      <input
-                        type="number"
-                        value={detail.additionalPrice}
-                        onChange={(e) =>
-                          updateOptionDetail(optionIndex, detailIndex, 'additionalPrice', parseInt(e.target.value) || 0)
-                        }
-                        className="p-2 border rounded"
-                      />
-                      <label className="text-sm text-gray-600 mb-1">추가 가격</label>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => removeOptionDetail(optionIndex, detailIndex)}
-                      className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
-                    >
-                      삭제
-                    </button>
-                  </div>
-                ))}
-                <button
-                  type="button"
-                  onClick={() => addOptionDetail(optionIndex)}
-                  className="mt-2 px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
-                >
-                  옵션값 추가
-                </button>
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        순서
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        옵션값
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        추가 가격
+                      </th>
+                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        작업
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {option.optionDetails.map((detail, detailIndex) => (
+                      <tr key={detailIndex} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{detailIndex + 1}</td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <input
+                            type="text"
+                            value={detail.value}
+                            onChange={(e) => updateOptionDetail(optionIndex, detailIndex, 'value', e.target.value)}
+                            placeholder="옵션값 (예: 빨강, 128GB)"
+                            className="w-full p-2 border rounded"
+                          />
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <input
+                            type="number"
+                            value={detail.additionalPrice}
+                            onChange={(e) =>
+                              updateOptionDetail(
+                                optionIndex,
+                                detailIndex,
+                                'additionalPrice',
+                                parseInt(e.target.value) || 0,
+                              )
+                            }
+                            className="w-32 p-2 border rounded"
+                          />
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                          <button
+                            type="button"
+                            onClick={() => removeOptionDetail(optionIndex, detailIndex)}
+                            className="text-red-600 hover:text-red-900"
+                          >
+                            삭제
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </div>
           ))}
@@ -202,7 +320,7 @@ export default function ProductRegister() {
 
         <div className="space-y-2">
           <label htmlFor="mainImage" className="block text-sm font-medium text-gray-700">
-            메인 이미지
+            메인 이미지 <span className="text-red-500">*</span>
           </label>
           <div className="flex flex-col gap-2">
             <input
@@ -233,7 +351,7 @@ export default function ProductRegister() {
 
         <div className="space-y-2">
           <label htmlFor="detailImages" className="block text-sm font-medium text-gray-700">
-            상세 이미지
+            상세 이미지 <span className="text-red-500">*</span>
           </label>
           <div className="flex flex-col gap-2">
             <input
@@ -268,10 +386,10 @@ export default function ProductRegister() {
 
         <button
           type="submit"
-          disabled={isPending}
+          disabled={isCreatePending}
           className="w-full px-4 py-2 text-white bg-blue-500 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {isPending ? '등록 중...' : '상품 등록'}
+          {isCreatePending ? '상품 수정' : '상품 등록'}
         </button>
       </form>
     </div>

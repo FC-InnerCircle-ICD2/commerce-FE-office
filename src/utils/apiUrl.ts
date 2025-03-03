@@ -1,1 +1,1 @@
-export const BASE_URL = 'http://3.37.67.153:8081';
+export const BASE_URL = 'https://product-api.emmotional-cart.click';

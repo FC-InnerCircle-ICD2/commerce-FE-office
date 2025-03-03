@@ -1,6 +1,14 @@
 import { ProductOption } from '../types/product';
+import { fetchWithAuth } from '../utils/fetchWithAuth';
+import { BASE_URL } from '../utils/apiUrl';
 
-const BASE_URL = '/admin/v1/products';
+export const ProductApis = {
+  getProducts: '/api/admin/v1/products',
+  createProduct: '/api/admin/v1/products',
+  getProductById: (id: string) => `/api/admin/v1/products/${id}`,
+  deleteProduct: (id: string) => `/api/admin/v1/products/${id}`,
+  updateProduct: (id: string) => `/api/admin/v1/products/${id}`,
+} as const;
 
 export interface CreateProductData {
   name: string;
@@ -19,11 +27,10 @@ const createFormData = (data: CreateProductData) => {
   Object.entries(data).forEach(([key, value]) => {
     if (value === undefined) return;
 
-    if (key !== 'mainImage' && key !== 'detailImages' && key !== 'options') {
-      formData.append(key, value);
-    } else if (key === 'options' && value) {
-      formData.append('options', JSON.stringify(value));
+    if (key === 'mainImage' || key === 'detailImages' || key === 'options') {
+      return; // Skip these special fields for now
     }
+    formData.append(key, value);
   });
 
   if ('mainImage' in data && data.mainImage) {
@@ -36,14 +43,81 @@ const createFormData = (data: CreateProductData) => {
     });
   }
 
+  // Handle options separately
+  if (data.options && data.options.length > 0) {
+    data.options.forEach((option, index) => {
+      formData.append(`options[${index}].name`, option.name);
+      option.optionDetails.forEach((detail, detailIndex) => {
+        formData.append(`options[${index}].optionDetails[${detailIndex}].value`, detail.value);
+        formData.append(`options[${index}].optionDetails[${detailIndex}].optionOrder`, String(detailIndex + 1));
+        formData.append(
+          `options[${index}].optionDetails[${detailIndex}].additionalPrice`,
+          detail.additionalPrice.toString(),
+        );
+      });
+    });
+  }
+
+  // Handle image files
+  if (data.mainImage) {
+    formData.append('mainImage', data.mainImage);
+  }
+
+  if (data.detailImages.length > 0) {
+    data.detailImages.forEach((file) => {
+      formData.append('detailImages', file);
+    });
+  }
+
   return formData;
 };
 
+export interface Provider {
+  id: number;
+  name: string;
+  code: string;
+}
+
 export const productApi = {
+  // 상품 상세 조회
+  getProductById: async (productId: string) => {
+    const response = await fetchWithAuth(`${BASE_URL}${ProductApis.getProductById(productId)}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch product details');
+    }
+    return response.json();
+  },
+
+  // 상품 목록 조회
+  getProducts: async (pageNumber: number, pageSize: number = 10) => {
+    const queryParams = new URLSearchParams({
+      pageNumber: pageNumber.toString(),
+      pageSize: pageSize.toString(),
+    });
+
+    const response = await fetchWithAuth(`${BASE_URL}${ProductApis.getProducts}?${queryParams}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch products');
+    }
+    return response.json();
+  },
+
   // 상품 등록
   createProduct: async (data: CreateProductData) => {
     const formData = createFormData(data);
-    const response = await fetch(BASE_URL, {
+    const response = await fetchWithAuth(`${BASE_URL}${ProductApis.createProduct}`, {
       method: 'POST',
       body: formData,
     });
@@ -53,5 +127,42 @@ export const productApi = {
     }
 
     return response.json();
+  },
+
+  // 상품 수정
+  updateProduct: async (productId: bigint, data: CreateProductData) => {
+    const formData = createFormData(data);
+    const response = await fetchWithAuth(`${BASE_URL}${ProductApis.updateProduct(String(productId))}`, {
+      method: 'PATCH',
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to edit product');
+    }
+
+    const contentType = response.headers.get('content-type');
+    if (contentType && contentType.indexOf('application/json') !== -1) {
+      try {
+        return await response.json();
+      } catch (error) {
+        console.error('JSON 파싱 오류:', error);
+        return null; // 또는 적절한 기본값 반환
+      }
+    } else {
+      console.log('서버에서 JSON이 아닌 응답을 받았습니다.');
+      return null; // 또는 적절한 기본값 반환
+    }
+  },
+
+  // 상품 삭제
+  deleteProduct: async (productId: bigint) => {
+    const response = await fetchWithAuth(`${BASE_URL}${ProductApis.deleteProduct(String(productId))}`, {
+      method: 'DELETE',
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to delete product');
+    }
   },
 };

@@ -19,7 +19,7 @@ function App() {
           <Route path={PAGE_ROUTE.LOGIN} element={<Login />} />
           <Route path={PAGE_ROUTE.JOIN} element={<Join />} />
           <Route path={PAGE_ROUTE.PRODUCT} element={<Product />} />
-          <Route path={PAGE_ROUTE.PRODUCT_REGISTER} element={<ProductRegister />} />
+          <Route path="/product/:productId" element={<ProductRegister />} />
           <Route path={PAGE_ROUTE.BANNER} element={<Banner />} />
           <Route path={PAGE_ROUTE.BANNER_REGISTER} element={<BannerRegister />} />
           <Route path={`${PAGE_ROUTE.BANNER}/:bannerID`} element={<BannerDetail />} />
