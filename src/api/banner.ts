@@ -27,30 +27,21 @@ export interface CreateBannerData {
   iconImage?: File | null;
 }
 
+const formatDate = (dateString: string) => {
+  return dateString.slice(0, 19);
+};
+
 const createFormData = (data: CreateBannerData) => {
   const formData = new FormData();
 
-  // Form fields
   Object.entries(data).forEach(([key, value]) => {
-    if (value === null || value === undefined || value === '') return;
-
-    // Handle files separately
-    if (key === 'bannerImage' || key === 'iconImage') {
-      if (value instanceof File) {
-        formData.append(key, value);
-      }
-      return;
+    if (key === 'startDate' || key === 'endDate') {
+      formData.append(key, formatDate(value as string));
+    } else if (value instanceof File) {
+      formData.append(key, value);
+    } else {
+      formData.append(key, String(value));
     }
-
-    // Handle dates
-    if ((key === 'startDate' || key === 'endDate') && typeof value === 'string') {
-      const date = new Date(value);
-      formData.append(key, date.toISOString());
-      return;
-    }
-
-    // Handle other fields
-    formData.append(key, value.toString());
   });
 
   return formData;
