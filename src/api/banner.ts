@@ -1,6 +1,8 @@
 import { fetchWithAuth } from '../utils/fetchWithAuth';
 import { BASE_URL } from '../utils/apiUrl';
 import { IBanner } from '../hooks/useBanner';
+import { z } from 'zod';
+import { bannerDetailSchema } from '../utils/zod/bannerSchema';
 
 export const BannerApis = {
   createBanner: '/api/admin/v1/banners',
@@ -27,6 +29,8 @@ export interface CreateBannerData {
   bannerImage?: File | null;
   iconImage?: File | null;
 }
+
+export type IBannerDetail = z.infer<typeof bannerDetailSchema>;
 
 const formatDate = (dateString: string) => {
   return dateString.slice(0, 19);
@@ -71,6 +75,17 @@ export const bannerApi = {
     }
 
     const data: IBanner[] = await response.json();
+    return data;
+  },
+  // 배너 상세 조회
+  getBannerDetail: async (id: string): Promise<IBannerDetail> => {
+    const response = await fetchWithAuth(`${BASE_URL}${BannerApis.createBanner}/${id}`);
+
+    if (!response.ok) {
+      throw new Error('배너 조회에 실패했습니다');
+    }
+
+    const data: IBannerDetail = await response.json();
     return data;
   },
 };

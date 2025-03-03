@@ -4,6 +4,8 @@ import { toast } from 'react-toastify';
 
 const BANNER_QUERY_KEY = 'banner' as const;
 
+const BANNER_QUERY_DETAIL_KEY = 'bannerDetail' as const;
+
 export interface IBanner {
   id: number;
   title: string;
@@ -23,6 +25,15 @@ export const useBanner = () => {
   });
 
   return { banners };
+};
+
+export const useBannerDetail = (id: string) => {
+  const { data: bannerDetail } = useQuery({
+    queryKey: [BANNER_QUERY_DETAIL_KEY, id],
+    queryFn: () => bannerApi.getBannerDetail(id),
+  });
+
+  return { bannerDetail };
 };
 
 export const useCreateBanner = (onSuccess?: () => void) => {

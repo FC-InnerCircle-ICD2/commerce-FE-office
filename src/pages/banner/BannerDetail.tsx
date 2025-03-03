@@ -2,41 +2,31 @@ import { z } from 'zod';
 import { bannerDetailSchema } from '../../utils/zod/bannerSchema';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useParams } from 'react-router';
+import { useBannerDetail } from '../../hooks/useBanner';
+import { useEffect } from 'react';
 
 type BannerFormType = z.infer<typeof bannerDetailSchema>;
 
-const bannerDetail: BannerFormType = {
-  id: 1,
-  title: 'Spring Mega Sale',
-  description: 'Get up to 50% off on selected products!',
-  bannerOrder: 1,
-  iconUrl: 'https://example.com/icons/spring-sale.png',
-  bannerImageUrl: 'https://example.com/images/spring-banner.jpg',
-  bannerType: 'PRODUCT',
-  startDate: '2025-03-10T08:00:00.000Z',
-  endDate: '2025-03-20T23:59:59.000Z',
-  createdAt: '2025-03-01T13:43:47.807Z',
-  updatedAt: '2025-03-01T13:43:47.807Z',
-  isDeleted: false,
-  productBannerResponse: {
-    id: 1,
-    linkUrl: 'https://example.com/products/101',
-    linkType: 'EXTERNAL',
-    productId: 101,
-  },
-};
-
 export default function BannerDetail() {
+  const param = useParams<{ bannerID: string }>();
+  const { bannerDetail } = useBannerDetail(param.bannerID ?? '');
   const {
     register,
     handleSubmit,
     formState: { errors },
     watch,
     setValue,
+    reset,
   } = useForm<BannerFormType>({
     resolver: zodResolver(bannerDetailSchema),
-    defaultValues: bannerDetail,
   });
+
+  useEffect(() => {
+    if (bannerDetail) {
+      reset(bannerDetail);
+    }
+  }, [bannerDetail, reset]);
 
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>, field: 'iconUrl' | 'bannerImageUrl') => {
     const file = event.target.files?.[0];
