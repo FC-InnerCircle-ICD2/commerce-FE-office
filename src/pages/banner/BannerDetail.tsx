@@ -57,7 +57,7 @@ export default function BannerDetail() {
     formData.append('startDate', data.startDate);
     formData.append('endDate', data.endDate);
     formData.append('iconImage', data.iconUrl);
-    formData.append('productId', BigInt(data.productBannerResponse.productId) as any);
+    formData.append('productId', String(data.productBannerResponse.productId));
     formData.append('linkUrl', data.productBannerResponse.linkUrl);
     formData.append('linkType', data.productBannerResponse.linkType);
     formData.append('bannerImage', data.bannerImageUrl);
@@ -99,7 +99,9 @@ export default function BannerDetail() {
           <div>
             <label className="block text-sm font-medium">Icon Image</label>
             <div className="flex gap-4">
-              <img src={iconPreview} alt="Icon Preview" className="w-20 h-20 object-cover rounded mb-2" />
+              {iconPreview !== '' && (
+                <img src={iconPreview} alt="Icon Preview" className="w-20 h-20 object-cover rounded mb-2" />
+              )}
               <input
                 type="file"
                 accept="image/*"
@@ -118,7 +120,9 @@ export default function BannerDetail() {
               onChange={(e) => handleImageChange(e, 'bannerImageUrl')}
               className="block w-full text-sm text-gray-500"
             />
-            <img src={bannerPreview} alt="Banner Preview" className="w-full h-40 object-cover rounded mt-2" />
+            {bannerPreview !== '' && (
+              <img src={bannerPreview} alt="Banner Preview" className="w-full h-40 object-cover rounded mt-2" />
+            )}
             {errors.bannerImageUrl && <p className="text-red-500 text-sm">{errors.bannerImageUrl.message}</p>}
           </div>
 
