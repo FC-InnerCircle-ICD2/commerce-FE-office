@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useParams } from 'react-router';
 import { useBannerDetail, useDeleteBanner, useUpdateBanner } from '../../hooks/useBanner';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { PAGE_ROUTE } from '../../utils/route';
 import FormInput from '../../components/common/FormInput';
@@ -14,6 +14,8 @@ type BannerFormType = z.infer<typeof bannerDetailSchema>;
 export default function BannerDetail() {
   const nav = useNavigate();
   const param = useParams<{ bannerID: string }>();
+  const [iconPreview, setIconPreview] = useState<string>('');
+  const [bannerPreview, setBannerPreview] = useState<string>('');
   const { bannerDetail } = useBannerDetail(param.bannerID ?? '');
   const { updateBannerMutate } = useUpdateBanner(() => nav(PAGE_ROUTE.BANNER));
   const { deleteBannerMutate } = useDeleteBanner();
@@ -30,6 +32,8 @@ export default function BannerDetail() {
 
   useEffect(() => {
     if (bannerDetail) {
+      setIconPreview(bannerDetail.iconUrl as string);
+      setBannerPreview(bannerDetail.bannerImageUrl as string);
       reset(bannerDetail);
     }
   }, [bannerDetail, reset]);
@@ -38,23 +42,26 @@ export default function BannerDetail() {
     const file = event.target.files?.[0];
     if (file) {
       const imageUrl = URL.createObjectURL(file);
-      setValue(field, imageUrl);
+      if (field === 'iconUrl') setIconPreview(imageUrl);
+      if (field === 'bannerImageUrl') setBannerPreview(imageUrl);
+      setValue(field, file);
     }
   };
 
   const onSubmit = (data: BannerFormType) => {
     const formData = new FormData();
-
-    Object.entries(data).forEach(([key, value]) => {
-      if (typeof value === 'object' && value !== null) {
-        Object.entries(value).forEach(([subKey, subValue]) => {
-          formData.append(`${key}[${subKey}]`, String(subValue));
-        });
-      } else {
-        formData.append(key, String(value));
-      }
-    });
-    updateBannerMutate(formData);
+    formData.append('type', data.bannerType);
+    formData.append('title', data.title);
+    formData.append('description', data.description);
+    formData.append('bannerOrder', String(data.bannerOrder));
+    formData.append('startDate', data.startDate);
+    formData.append('endDate', data.endDate);
+    formData.append('iconImage', data.iconUrl);
+    formData.append('productId', BigInt(data.productBannerResponse.productId) as any);
+    formData.append('linkUrl', data.productBannerResponse.linkUrl);
+    formData.append('linkType', data.productBannerResponse.linkType);
+    formData.append('bannerImage', data.bannerImageUrl);
+    updateBannerMutate({ id: data.id, data: formData });
   };
 
   return (
@@ -92,7 +99,7 @@ export default function BannerDetail() {
           <div>
             <label className="block text-sm font-medium">Icon Image</label>
             <div className="flex gap-4">
-              <img src={watch('iconUrl')} alt="Icon Preview" className="w-20 h-20 object-cover rounded mb-2" />
+              <img src={iconPreview} alt="Icon Preview" className="w-20 h-20 object-cover rounded mb-2" />
               <input
                 type="file"
                 accept="image/*"
@@ -111,7 +118,7 @@ export default function BannerDetail() {
               onChange={(e) => handleImageChange(e, 'bannerImageUrl')}
               className="block w-full text-sm text-gray-500"
             />
-            <img src={watch('bannerImageUrl')} alt="Banner Preview" className="w-full h-40 object-cover rounded mt-2" />
+            <img src={bannerPreview} alt="Banner Preview" className="w-full h-40 object-cover rounded mt-2" />
             {errors.bannerImageUrl && <p className="text-red-500 text-sm">{errors.bannerImageUrl.message}</p>}
           </div>
 

@@ -32,6 +32,11 @@ export interface CreateBannerData {
 
 export type IBannerDetail = z.infer<typeof bannerDetailSchema>;
 
+export type BannerUpdateProps = {
+  id: number;
+  data: FormData;
+};
+
 const formatDate = (dateString: string) => {
   return dateString.slice(0, 19);
 };
@@ -103,11 +108,11 @@ export const bannerApi = {
     return data;
   },
   // 배너 수정
-  updateBanner: async (data: FormData) => {
-    console.log(data);
-    const response = await fetchWithAuth(`${BASE_URL}${BannerApis.createBanner}/${data.get('id')}`, {
+  updateBanner: async ({ id, data }: BannerUpdateProps) => {
+    const response = await fetchWithAuth(`${BASE_URL}${BannerApis.createBanner}/${id}`, {
       method: 'PUT',
       body: data,
+      headers: {},
     });
 
     if (!response.ok) {
