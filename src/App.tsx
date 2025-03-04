@@ -9,6 +9,7 @@ import Order from './pages/order/Order';
 import Login from './pages/login/Login';
 import Join from './pages/join/Join';
 import { AuthProvider } from './authContext';
+import Dashboard from './pages/dashboard/Dashboard';
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
         <Route element={<ProtectedRoute />}>
           <Route path={PAGE_ROUTE.LOGIN} element={<Login />} />
           <Route path={PAGE_ROUTE.JOIN} element={<Join />} />
+          <Route path={PAGE_ROUTE.DASHBOARD} element={<Dashboard />} />
           <Route path={PAGE_ROUTE.PRODUCT} element={<Product />} />
           <Route path="/product/:productId" element={<ProductRegister />} />
           <Route path={PAGE_ROUTE.BANNER} element={<Banner />} />
