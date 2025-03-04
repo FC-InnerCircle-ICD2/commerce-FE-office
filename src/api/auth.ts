@@ -4,7 +4,7 @@ import { fetchWithAuth } from '../utils/fetchWithAuth';
 const MEMBER_URL = 'https://member-api.emmotional-cart.click/';
 
 export async function join(email: string, password: string, phone: string, userName: string) {
-  const result = await fetch(`${BASE_URL}/api/v1/admin/members/auth`, {
+  const result = await fetch(`https://member-api.emmotional-cart.click/api/v1/admin/members/auth`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
