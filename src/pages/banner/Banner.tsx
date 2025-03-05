@@ -35,9 +35,16 @@ export default function Banner() {
             <li
               key={banner.id}
               onClick={() => handleListClick(banner.id)}
-              className="p-4 rounded-md flex justify-between items-center cursor-pointer hover:bg-slate-200 "
+              className={`p-4 rounded-md flex justify-between items-center cursor-pointer hover:bg-slate-200 ${
+                banner.isDeleted ? 'opacity-50 line-through bg-red-50' : ''
+              }`}
             >
-              <span className="text-sm text-gray-600 font-medium w-1/4 truncate">{banner.title}</span>
+              <span className="text-sm text-gray-600 font-medium w-1/4 truncate">
+                {banner.title}
+                {banner.isDeleted && (
+                  <span className="ml-2 text-xs text-red-500">(삭제됨)</span>
+                )}
+              </span>
               <span className="text-sm text-gray-600 w-1/4">{banner.bannerType}</span>
               <span className="text-sm text-gray-500 w-1/4">{new Date(banner.startDate).toLocaleDateString()}</span>
               <span className="text-sm text-gray-500 w-1/4">{new Date(banner.endDate).toLocaleDateString()}</span>
