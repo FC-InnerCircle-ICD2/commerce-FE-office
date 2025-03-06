@@ -27,7 +27,7 @@ async function getOrder(pageNumber: number, pageSize: number = 10, orderId?: str
     pageSize: pageSize.toString(),
   });
   const response = await fetchWithAuth(
-    `https://order-api.emmotional-cart.click/api/admin/v1/orders?${queryParams}${orderId && `&orderId=${orderId}`}`,
+    `https://order-api.emmotional-cart.click/api/admin/v1/orders?${queryParams}${orderId !== '' && `&orderId=${orderId}`}`,
   );
 
   if (!response.ok) {

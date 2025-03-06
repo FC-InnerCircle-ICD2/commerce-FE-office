@@ -7,7 +7,7 @@ export default function Order() {
   const pageSize = 10;
   const [search, setSearch] = useState<string>('');
   const [orderId, setOrderId] = useState<string>('');
-  const { data } = useGetOrder(page, pageSize);
+  const { data } = useGetOrder(page, pageSize, orderId);
 
   const totalPages = Math.ceil(data?.page.totalElements ? data.page.totalElements / 10 : 1);
 
