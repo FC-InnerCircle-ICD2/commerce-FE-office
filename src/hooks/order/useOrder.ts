@@ -21,12 +21,14 @@ export interface IOrderResponse {
   page: Page;
 }
 
-async function getOrder(pageNumber: number, pageSize: number = 10) {
+async function getOrder(pageNumber: number, pageSize: number = 10, orderId?: string) {
   const queryParams = new URLSearchParams({
     pageNumber: pageNumber.toString(),
     pageSize: pageSize.toString(),
   });
-  const response = await fetchWithAuth(`https://order-api.emmotional-cart.click/api/admin/v1/orders?${queryParams}`);
+  const response = await fetchWithAuth(
+    `https://order-api.emmotional-cart.click/api/admin/v1/orders?${queryParams}${orderId && `&orderId=${orderId}`}`,
+  );
 
   if (!response.ok) {
     throw new Error('Failed to fetch products');
@@ -35,9 +37,9 @@ async function getOrder(pageNumber: number, pageSize: number = 10) {
   return result;
 }
 
-export const useGetOrder = (pageNumber: number, pageSize: number = 10) => {
+export const useGetOrder = (pageNumber: number, pageSize: number = 10, orderId?: string) => {
   return useQuery({
-    queryKey: ['order', pageNumber, pageSize],
-    queryFn: () => getOrder(pageNumber, pageSize),
+    queryKey: ['order', pageNumber, pageSize, orderId],
+    queryFn: () => getOrder(pageNumber, pageSize, orderId),
   });
 };
