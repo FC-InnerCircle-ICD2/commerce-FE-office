@@ -29,6 +29,12 @@ export default function Sidebar() {
   return (
     <ul className="p-5 flex flex-col gap-3">
       <li
+        className={`w-[200px] h-[50px] flex items-center justify-center cursor-pointer ${checkLocationName(PAGE_ROUTE.DASHBOARD) && 'font-bold bg-slate-200'} hover:font-bold hover:bg-slate-200`}
+        onClick={() => handleNavigation(PAGE_ROUTE.DASHBOARD)}
+      >
+        대시 보드
+      </li>
+      <li
         className={`w-[200px] h-[50px] flex items-center justify-center cursor-pointer ${checkLocationName(PAGE_ROUTE.PRODUCT) && 'font-bold bg-slate-200'} hover:font-bold hover:bg-slate-200`}
         onClick={() => handleNavigation(PAGE_ROUTE.PRODUCT)}
       >

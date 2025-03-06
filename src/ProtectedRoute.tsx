@@ -13,7 +13,11 @@ export default function ProtectedRoute() {
 
   return isAuthenticated ? (
     <>
-      <button onClick={() => logout()}>로그아웃</button>
+      <nav className="w-full h-[50px] shadow-md flex items-center justify-end px-[10px]">
+        <button className="text-xs bg-black font-bold text-white px-2 py-2 rounded" onClick={() => logout()}>
+          로그아웃
+        </button>
+      </nav>
       <Layout>
         <Outlet />
       </Layout>

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { PAGE_ROUTE } from '../../utils/route';
 import { useGetProducts, useDeleteProduct } from '../../hooks/useProducts';
 import Pagination from './Pagination';
+import { TrashIcon } from '@heroicons/react/24/solid';
 
 interface Product {
   id: string;
@@ -100,25 +101,25 @@ export default function Product() {
                     className="hover:bg-gray-50 cursor-pointer"
                     onClick={() => navigate(`/product/${product.id}`)}
                   >
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{product.id}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{product.name}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <td className="px-6 py-4 whitespace-normal text-xs text-gray-900">{product.id}</td>
+                    <td className="px-6 py-4 whitespace-normal text-sm text-gray-900">{product.name}</td>
+                    <td className="px-6 py-4 whitespace-normal text-sm text-gray-900">
                       {new Intl.NumberFormat('ko-KR', { style: 'currency', currency: 'KRW' }).format(product.price)}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{product.providerName}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{product.categoryName}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <td className="px-6 py-4 whitespace-normal text-sm text-gray-900">{product.providerName}</td>
+                    <td className="px-6 py-4 whitespace-normal text-sm text-gray-900">{product.categoryName}</td>
+                    <td className="px-6 py-4 whitespace-normal text-sm text-gray-900">
                       <img src={product.mainImageUrl} alt={product.name} className="w-16 h-16 object-cover rounded" />
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <td className="px-6 py-4 whitespace-normal text-sm text-gray-900">
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
                           handleDeleteProduct(product.id);
                         }}
-                        className="px-2 py-1 bg-red-500 text-white rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 transition-colors"
+                        className="px-1 py-1 bg-red-500 text-white rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 transition-colors"
                       >
-                        삭제
+                        <TrashIcon className="size-6 text-white" />
                       </button>
                     </td>
                   </tr>
@@ -126,6 +127,7 @@ export default function Product() {
               </tbody>
             </table>
           </div>
+
           <Pagination currentPage={page} totalPages={totalPages} onPageChange={handlePageChange} />
         </>
       )}
