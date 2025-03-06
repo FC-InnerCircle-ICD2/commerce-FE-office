@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import dummydata from './dummydata.json';
+import { useQuery } from '@tanstack/react-query';
+import { dashboardApi } from '../../api/dashboard';
 
 interface Highlightable {
   highlight: string;
@@ -28,7 +29,13 @@ interface Section<T> {
   data: T[];
 }
 
-// ID를 추출하는 헬퍼 함수
+interface ApiResponse {
+  products: Product[];
+  orders: Order[];
+  banners: Banner[];
+  providers: Provider[];
+}
+
 const getItemId = (item: SectionData): string => {
   if ('productId' in item) return item.productId;
   if ('orderId' in item) return item.orderId;
@@ -37,7 +44,6 @@ const getItemId = (item: SectionData): string => {
   throw new Error('Unknown item type');
 };
 
-// 검색 폼 컴포넌트
 function SearchForm({
   search,
   setSearch,
@@ -63,53 +69,77 @@ function SearchForm({
   );
 }
 
-// 섹션 리스트 컴포넌트
-function SectionList({ sections }: { sections: Section<SectionData>[] }) {
+function SectionList({ sections, isLoading }: { sections: Section<SectionData>[]; isLoading: boolean }) {
+  if (isLoading) {
+    return <div className="text-center p-8">데이터를 불러오는 중...</div>;
+  }
+
+  if (sections.every((section) => section.data.length === 0)) {
+    return <div className="text-center p-8">검색 결과가 없습니다.</div>;
+  }
+
   return (
     <div className="space-y-8">
-      {sections.map((section) => (
-        <section key={section.title} className="bg-white p-6 rounded shadow">
-          <h2 className="text-2xl font-semibold mb-4 border-b pb-2">{section.title}</h2>
-          <div className="space-y-4">
-            {section.data.map((item) => (
-              <div key={getItemId(item)} className="p-4 border rounded shadow-sm hover:shadow-md transition">
-                <p className="text-gray-500 text-sm font-medium">ID: {getItemId(item)}</p>
-                <p className="mt-2 text-lg text-gray-800" dangerouslySetInnerHTML={{ __html: item.highlight }} />
-              </div>
-            ))}
-          </div>
-        </section>
-      ))}
+      {sections.map((section) => {
+        if (section.data.length === 0) return null;
+
+        return (
+          <section key={section.title} className="bg-white p-6 rounded shadow">
+            <h2 className="text-2xl font-semibold mb-4 border-b pb-2">{section.title}</h2>
+            <div className="space-y-4">
+              {section.data.map((item) => (
+                <div key={getItemId(item)} className="p-4 border rounded shadow-sm hover:shadow-md transition">
+                  <p className="text-gray-500 text-sm font-medium">ID: {getItemId(item)}</p>
+                  <p className="mt-2 text-lg text-gray-800" dangerouslySetInnerHTML={{ __html: item.highlight }} />
+                </div>
+              ))}
+            </div>
+          </section>
+        );
+      })}
     </div>
   );
 }
 
-// 대시보드 컴포넌트
 export default function Dashboard() {
   const [query, setQuery] = useState<string>('');
   const [search, setSearch] = useState<string>('');
 
+  const { data, isLoading, error } = useQuery<ApiResponse>({
+    queryKey: ['dashboard', query],
+    queryFn: () => dashboardApi.getDashboard(query),
+    enabled: query !== '',
+  });
+
   useEffect(() => {
-    console.log(query);
-  }, [query]);
+    console.log('검색어:', query);
+    if (error) {
+      console.error('API 오류:', error);
+    }
+  }, [query, error]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setQuery(search);
-    setSearch('');
   };
 
   const sections: Section<SectionData>[] = [
-    { title: 'Products', data: dummydata.products },
-    { title: 'Orders', data: dummydata.orders },
-    { title: 'Banners', data: dummydata.banners },
-    { title: 'Providers', data: dummydata.providers },
+    { title: 'Products', data: data?.products || [] },
+    { title: 'Orders', data: data?.orders || [] },
+    { title: 'Banners', data: data?.banners || [] },
+    { title: 'Providers', data: data?.providers || [] },
   ];
 
   return (
     <div className="p-8 w-full">
       <SearchForm search={search} setSearch={setSearch} onSubmit={handleSubmit} />
-      <SectionList sections={sections} />
+      {error ? (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+          데이터를 불러오는 중 오류가 발생했습니다: {error instanceof Error ? error.message : '알 수 없는 오류'}
+        </div>
+      ) : (
+        <SectionList sections={sections} isLoading={isLoading && query !== ''} />
+      )}
     </div>
   );
 }
