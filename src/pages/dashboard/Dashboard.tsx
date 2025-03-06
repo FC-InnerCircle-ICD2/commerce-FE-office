@@ -36,6 +36,10 @@ interface ApiResponse {
   providers: Provider[];
 }
 
+interface PaginationState {
+  [key: string]: number; // 각 섹션별 현재 페이지 (title: currentPage)
+}
+
 const getItemId = (item: SectionData): string => {
   if ('productId' in item) return item.productId;
   if ('orderId' in item) return item.orderId;
@@ -69,7 +73,149 @@ function SearchForm({
   );
 }
 
+// 페이지네이션 컴포넌트
+function Pagination({
+  currentPage,
+  totalPages,
+  onPageChange,
+  sectionTitle,
+}: {
+  currentPage: number;
+  totalPages: number;
+  onPageChange: (page: number, sectionTitle: string) => void;
+  sectionTitle: string;
+}) {
+  // 페이지 버튼 생성 (최대 5개)
+  const getPageButtons = () => {
+    const buttons = [];
+    const startPage = Math.max(1, currentPage - 2);
+    const endPage = Math.min(totalPages, startPage + 4);
+
+    for (let i = startPage; i <= endPage; i++) {
+      buttons.push(
+        <button
+          key={i}
+          onClick={() => onPageChange(i, sectionTitle)}
+          className={`px-3 py-1 mx-1 rounded ${
+            currentPage === i ? 'bg-blue-600 text-white' : 'bg-gray-200 hover:bg-gray-300'
+          }`}
+        >
+          {i}
+        </button>,
+      );
+    }
+    return buttons;
+  };
+
+  return (
+    <div className="flex justify-center mt-4 mb-2 items-center">
+      <button
+        onClick={() => onPageChange(currentPage - 1, sectionTitle)}
+        disabled={currentPage <= 1}
+        className={`px-3 py-1 rounded mr-2 ${
+          currentPage <= 1 ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-gray-200 hover:bg-gray-300'
+        }`}
+      >
+        이전
+      </button>
+
+      {getPageButtons()}
+
+      <button
+        onClick={() => onPageChange(currentPage + 1, sectionTitle)}
+        disabled={currentPage >= totalPages}
+        className={`px-3 py-1 rounded ml-2 ${
+          currentPage >= totalPages ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-gray-200 hover:bg-gray-300'
+        }`}
+      >
+        다음
+      </button>
+    </div>
+  );
+}
+
+// 섹션 컴포넌트
+function SectionComponent({
+  section,
+  currentPage,
+  onPageChange,
+}: {
+  section: Section<SectionData>;
+  currentPage: number;
+  onPageChange: (page: number, sectionTitle: string) => void;
+}) {
+  const itemsPerPage = 6;
+  const totalItems = section.data.length;
+  const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
+
+  // 현재 페이지에 표시할 항목 계산
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
+  const currentItems = section.data.slice(startIndex, endIndex);
+
+  // 항목이 없으면 렌더링하지 않음
+  if (totalItems === 0) return null;
+
+  return (
+    <section className="bg-white p-6 rounded shadow mb-8">
+      <h2 className="text-2xl font-semibold mb-4 border-b pb-2">
+        {section.title} <span className="text-sm text-gray-500">({totalItems})</span>
+      </h2>
+
+      <div className="space-y-4">
+        {currentItems.map((item) => (
+          <div key={getItemId(item)} className="p-4 border rounded shadow-sm hover:shadow-md transition">
+            <p className="text-gray-500 text-sm font-medium">ID: {getItemId(item)}</p>
+            <p className="mt-2 text-lg text-gray-800" dangerouslySetInnerHTML={{ __html: item.highlight }} />
+          </div>
+        ))}
+      </div>
+
+      {/* 6개 이상일 때만 페이지네이션 표시 */}
+      {totalItems > itemsPerPage && (
+        <>
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={onPageChange}
+            sectionTitle={section.title}
+          />
+          <div className="text-center text-gray-500 text-sm">
+            {startIndex + 1}-{endIndex} / {totalItems}
+          </div>
+        </>
+      )}
+    </section>
+  );
+}
+
 function SectionList({ sections, isLoading }: { sections: Section<SectionData>[]; isLoading: boolean }) {
+  // 각 섹션별 페이지네이션 상태 관리
+  const [paginationState, setPaginationState] = useState<PaginationState>({});
+
+  // 페이지 초기화 (검색 결과가 변경되면)
+  useEffect(() => {
+    const initialPagination: PaginationState = {};
+    sections.forEach((section) => {
+      initialPagination[section.title] = 1;
+    });
+    setPaginationState(initialPagination);
+  }, [sections]);
+
+  // 페이지 변경 핸들러
+  const handlePageChange = (page: number, sectionTitle: string) => {
+    setPaginationState((prev) => ({
+      ...prev,
+      [sectionTitle]: page,
+    }));
+
+    // 해당 섹션으로 스크롤
+    const sectionElement = document.getElementById(`section-${sectionTitle}`);
+    if (sectionElement) {
+      sectionElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
   if (isLoading) {
     return <div className="text-center p-8">데이터를 불러오는 중...</div>;
   }
@@ -78,25 +224,20 @@ function SectionList({ sections, isLoading }: { sections: Section<SectionData>[]
     return <div className="text-center p-8">검색 결과가 없습니다.</div>;
   }
 
-  return (
-    <div className="space-y-8">
-      {sections.map((section) => {
-        if (section.data.length === 0) return null;
+  // 데이터가 있는 섹션만 필터링
+  const sectionsWithData = sections.filter((section) => section.data.length > 0);
 
-        return (
-          <section key={section.title} className="bg-white p-6 rounded shadow">
-            <h2 className="text-2xl font-semibold mb-4 border-b pb-2">{section.title}</h2>
-            <div className="space-y-4">
-              {section.data.map((item) => (
-                <div key={getItemId(item)} className="p-4 border rounded shadow-sm hover:shadow-md transition">
-                  <p className="text-gray-500 text-sm font-medium">ID: {getItemId(item)}</p>
-                  <p className="mt-2 text-lg text-gray-800" dangerouslySetInnerHTML={{ __html: item.highlight }} />
-                </div>
-              ))}
-            </div>
-          </section>
-        );
-      })}
+  return (
+    <div>
+      {sectionsWithData.map((section) => (
+        <div key={section.title} id={`section-${section.title}`}>
+          <SectionComponent
+            section={section}
+            currentPage={paginationState[section.title] || 1}
+            onPageChange={handlePageChange}
+          />
+        </div>
+      ))}
     </div>
   );
 }
