@@ -85,7 +85,6 @@ function Pagination({
   onPageChange: (page: number, sectionTitle: string) => void;
   sectionTitle: string;
 }) {
-  // 페이지 버튼 생성 (최대 5개)
   const getPageButtons = () => {
     const buttons = [];
     const startPage = Math.max(1, currentPage - 2);
@@ -148,12 +147,10 @@ function SectionComponent({
   const totalItems = section.data.length;
   const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
 
-  // 현재 페이지에 표시할 항목 계산
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
   const currentItems = section.data.slice(startIndex, endIndex);
 
-  // 항목이 없으면 렌더링하지 않음
   if (totalItems === 0) return null;
 
   return (
@@ -171,7 +168,6 @@ function SectionComponent({
         ))}
       </div>
 
-      {/* 6개 이상일 때만 페이지네이션 표시 */}
       {totalItems > itemsPerPage && (
         <>
           <Pagination
@@ -189,11 +185,17 @@ function SectionComponent({
   );
 }
 
-function SectionList({ sections, isLoading }: { sections: Section<SectionData>[]; isLoading: boolean }) {
-  // 각 섹션별 페이지네이션 상태 관리
+function SectionList({
+  sections,
+  isLoading,
+  searchQuery,
+}: {
+  sections: Section<SectionData>[];
+  isLoading: boolean;
+  searchQuery: string;
+}) {
   const [paginationState, setPaginationState] = useState<PaginationState>({});
 
-  // 페이지 초기화 (검색 결과가 변경되면)
   useEffect(() => {
     const initialPagination: PaginationState = {};
     sections.forEach((section) => {
@@ -202,14 +204,12 @@ function SectionList({ sections, isLoading }: { sections: Section<SectionData>[]
     setPaginationState(initialPagination);
   }, [sections]);
 
-  // 페이지 변경 핸들러
   const handlePageChange = (page: number, sectionTitle: string) => {
     setPaginationState((prev) => ({
       ...prev,
       [sectionTitle]: page,
     }));
 
-    // 해당 섹션으로 스크롤
     const sectionElement = document.getElementById(`section-${sectionTitle}`);
     if (sectionElement) {
       sectionElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -220,11 +220,14 @@ function SectionList({ sections, isLoading }: { sections: Section<SectionData>[]
     return <div className="text-center p-8">데이터를 불러오는 중...</div>;
   }
 
-  if (sections.every((section) => section.data.length === 0)) {
-    return <div className="text-center p-8">검색 결과가 없습니다.</div>;
+  if (!searchQuery) {
+    return <div className="text-center p-8">검색어를 입력해주세요</div>; // 검색어 입력 전 문구
   }
 
-  // 데이터가 있는 섹션만 필터링
+  if (sections.every((section) => section.data.length === 0)) {
+    return <div className="text-center p-8">검색 결과가 없습니다.</div>; // 검색 결과가 없을 때 문구
+  }
+
   const sectionsWithData = sections.filter((section) => section.data.length > 0);
 
   return (
@@ -279,7 +282,7 @@ export default function Dashboard() {
           데이터를 불러오는 중 오류가 발생했습니다: {error instanceof Error ? error.message : '알 수 없는 오류'}
         </div>
       ) : (
-        <SectionList sections={sections} isLoading={isLoading && query !== ''} />
+        <SectionList sections={sections} isLoading={isLoading && query !== ''} searchQuery={query} />
       )}
     </div>
   );
