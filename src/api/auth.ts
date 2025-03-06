@@ -1,4 +1,3 @@
-import { BASE_URL } from '../utils/apiUrl';
 import { fetchWithAuth } from '../utils/fetchWithAuth';
 
 const MEMBER_URL = 'https://member-api.emmotional-cart.click/';
