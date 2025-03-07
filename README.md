@@ -32,35 +32,7 @@ https://fc-innercircle-icd2.github.io/commerce-FE-office/dashborad
 ## 🐾 기술 스택
 
 ### 프레임워크 및 라이브러리
-- React
-- Vite
-
-### 언어
-- TypeScript
-
-### 상태 관리
-- TanStack Query
-
-### 라우팅
-- React Router
-
-### 폼 관리 및 유효성 검사
-- React Hook Form
-- Zod
-
-### 스타일링
-- Tailwind CSS
-
-### 개발 도구
-- ESLint
-- Prettier
-- husky
-
-### 기타
-- React Toastify
-
-### 배포
-- gh-pages
+[![stackticon](https://firebasestorage.googleapis.com/v0/b/stackticon-81399.appspot.com/o/images%2F1741356589931?alt=media&token=8f42b744-1aa8-4f5c-b37a-f26ae6b6fd84)](https://github.com/msdio/stackticon)
 
 
 ## 🐾 설치 및 실행 방법
