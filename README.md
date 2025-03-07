@@ -69,7 +69,7 @@ npm run dev
 |[@kigpand](https://github.com/kigpand)|[@HelloHailie](https://github.com/HelloHailie)|
 
 
-## 🔛 이커머스 (유저용 사이트) 레포지토리 사이트
+## 🔛 이커머스 (유저용) 레포지토리 사이트
 [유저용 사이트 GitHub 레포지토리 주소](https://github.com/FC-InnerCircle-ICD2/commerce-FE)
-## 🔛 이커머스 (유저용 사이트) 배포 사이트
+## 🔛 이커머스 (유저용) 배포 사이트
 [https://www.emmotional-cart.click/](https://www.emmotional-cart.click/)
